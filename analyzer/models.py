@@ -32,7 +32,7 @@ class News(models.Model):
 
 class Operation(BaseModel):
     news_id = models.OneToOneField('News', related_name='operations', related_query_name='operation',
-                                 on_delete=models.CASCADE)
+                                 on_delete=models.CASCADE, db_column='news_id')
     keyword = models.BooleanField(default=False)
     ner = models.BooleanField(default=False)
     category = models.BooleanField(default=False)
@@ -55,4 +55,19 @@ class Option(models.Model):
        db_table = 'options'
     
     def __str__(self):
-        return '{}'.format(self.key)    
+        return '{}'.format(self.key)
+    
+
+class Keyword(models.Model):
+    news_id = models.OneToOneField('News', related_name='keywords', related_query_name='keyword',
+                                 on_delete=models.CASCADE, db_column='news_id')
+    keyword = models.CharField(max_length=70)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+       managed = False
+       db_table = 'news_keyword'
+    
+    def __str__(self):
+        return '{}'.format(self.id)

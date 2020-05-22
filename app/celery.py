@@ -19,6 +19,10 @@ app.conf.update(
 app.conf.beat_schedule = {
     'news_mongo_to_postgres': {
         'task': 'news_mongo_to_postgres',
+        'schedule': 5 * 60,
+    },
+    'news_keyword_extraction': {
+        'task': 'news_keyword_extraction',
         'schedule': 1 * 20,
     },
 }
