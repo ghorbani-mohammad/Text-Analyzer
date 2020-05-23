@@ -10,8 +10,8 @@ class doc2vec(ABC):
         pass
 
 class doc2vecStrategyA(doc2vec):
-    def __init__(self):
-        self.nlp = spacy.load("en_core_web_sm")
+    def __init__(self, model):
+        self.nlp = model
     def analyze(self, body_text):
         doc = self.nlp(body_text)
         t = doc.vector.tolist()

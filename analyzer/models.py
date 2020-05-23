@@ -141,3 +141,19 @@ class Doc2vec(models.Model):
     
     def __str__(self):
         return '{}'.format(self.id)
+
+
+class Related(models.Model):
+    news_id = models.OneToOneField('News', related_name='relateds', related_query_name='related',
+                                 on_delete=models.CASCADE, db_column='news_id')
+    related_news_id = models.BigIntegerField()
+    score = models.FloatField(default=0.0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+       managed = False
+       db_table = 'news_related'
+    
+    def __str__(self):
+        return '{}'.format(self.id)

@@ -1,9 +1,9 @@
 from analyzer.doc2vec.doc2vec import *
 
 
-def analyzeDoc2vec(news_id, text, now, config):
+def analyzeDoc2vec(news_id, text, now, config, model):
     if config == "spacy":
-        doc2vec_analyzer = doc2vecAnalyzer(doc2vecStrategyA())
+        doc2vec_analyzer = doc2vecAnalyzer(doc2vecStrategyA(model))
         vector, vector_norm = doc2vec_analyzer.analyze(text)
     else:
         doc2vec_analyzer = doc2vecAnalyzer(doc2vecStrategyA())

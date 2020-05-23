@@ -15,6 +15,8 @@ app = Celery('app',
 app.conf.update(
     result_expires=7200,
 )
+# if you want to purge works queue
+# app.control.purge()
 
 MINUTE = 60
 
@@ -41,7 +43,11 @@ app.conf.beat_schedule = {
     },
     'news_doc2vec': {
         'task': 'news_doc2vec',
-        'schedule': 5 * MINUTE,
+        'schedule': 10 * MINUTE,
+    },
+    'news_related': {
+        'task': 'news_related',
+        'schedule': 15 * MINUTE,
     },
 }
 

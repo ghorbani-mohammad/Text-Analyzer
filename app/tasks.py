@@ -11,11 +11,12 @@ from geopy.geocoders import Nominatim
 
 from .celery import app
 from celery import current_app
-from analyzer.models import News, Option, Operation, Keyword, Ner, Geo, Sentiment, Doc2vec
+from analyzer.models import News, Option, Operation, Keyword, Ner, Geo, Sentiment, Doc2vec, Related
 from analyzer.keyword import keywordAnalyzer
 from analyzer.ner import ner
 from analyzer.sentiment import sentimentAnalyzer
 from analyzer.doc2vec import doc2vecAnalyzer
+from analyzer.related import related
 
 
 logger = logging.getLogger('django')
@@ -177,14 +178,31 @@ def news_sentiment():
 
 @app.task(name='news_doc2vec')
 def news_doc2vec():
+    import spacy
+    spacy_model = spacy.load("en_core_web_md")
     doc2vec_analyzer_algorithm = Option.objects.get(key='doc2vec_analyzer').value
     news = Operation.objects.filter(doc2vec=False)
-    print(news.count())
     for item in news[:50]:
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         with transaction.atomic():
             Doc2vec.objects.filter(news_id=item.news_id.id).delete()
-            vector, vector_norm = doc2vecAnalyzer.analyzeDoc2vec(item.news_id.id, item.news_id.body, now, doc2vec_analyzer_algorithm)
+            vector, vector_norm = doc2vecAnalyzer.analyzeDoc2vec(item.news_id.id, item.news_id.body, now, doc2vec_analyzer_algorithm, spacy_model)
             Doc2vec.objects.create(news_id=item.news_id, vector=vector, vector_norm=vector_norm, created_at=now)
             Operation.objects.filter(news_id=item.news_id).update(doc2vec=True)
 
+
+@app.task(name='news_related')
+def news_related():
+    related_extraction_limit = int(Option.objects.get(key='number_of_related_news').value)
+    related_extraction_days = int(Option.objects.get(key='past_days_related_news').value)
+    news = Operation.objects.filter(related_news=False)
+    for item in news[:20]:
+        with transaction.atomic():
+            Related.objects.filter(news_id=item.news_id.id).delete()
+            results = related.relatedNews(item.news_id.id, related_extraction_limit, related_extraction_days)
+            obj = []
+            now = time.strftime("%Y-%m-%d %H:%M:%S")
+            for x in results:
+                obj.append(Related(news_id=News.objects.filter(id=x['news_id']).first(), related_news_id=x['related_news_id'], score=x['score'], created_at=now))
+            Related.objects.bulk_create(obj)
+            Operation.objects.filter(news_id=item.news_id).update(related_news=True)
