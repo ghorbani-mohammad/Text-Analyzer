@@ -11,10 +11,11 @@ from geopy.geocoders import Nominatim
 
 from .celery import app
 from celery import current_app
-from analyzer.models import News, Option, Operation, Keyword, Ner, Geo, Sentiment
+from analyzer.models import News, Option, Operation, Keyword, Ner, Geo, Sentiment, Doc2vec
 from analyzer.keyword import keywordAnalyzer
 from analyzer.ner import ner
 from analyzer.sentiment import sentimentAnalyzer
+from analyzer.doc2vec import doc2vecAnalyzer
 
 
 logger = logging.getLogger('django')
@@ -172,3 +173,18 @@ def news_sentiment():
             result = sentimentAnalyzer.analyzeSentiment(item.news_id.id, item.news_id.body, now, sentiment_analyzer_algorithm)
             Sentiment.objects.create(news_id=item.news_id,  neg=round(result['neg'], 2), pos=round(result['pos'], 2), neu=round(result['neu'], 2), compound=round(result['compound'], 2), created_at= now)
             Operation.objects.filter(news_id=item.news_id).update(sentiment=True)
+
+
+@app.task(name='news_doc2vec')
+def news_doc2vec():
+    doc2vec_analyzer_algorithm = Option.objects.get(key='doc2vec_analyzer').value
+    news = Operation.objects.filter(doc2vec=False)
+    print(news.count())
+    for item in news[:50]:
+        now = time.strftime("%Y-%m-%d %H:%M:%S")
+        with transaction.atomic():
+            Doc2vec.objects.filter(news_id=item.news_id.id).delete()
+            vector, vector_norm = doc2vecAnalyzer.analyzeDoc2vec(item.news_id.id, item.news_id.body, now, doc2vec_analyzer_algorithm)
+            Doc2vec.objects.create(news_id=item.news_id, vector=vector, vector_norm=vector_norm, created_at=now)
+            Operation.objects.filter(news_id=item.news_id).update(doc2vec=True)
+

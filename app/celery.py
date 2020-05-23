@@ -39,6 +39,10 @@ app.conf.beat_schedule = {
         'task': 'news_sentiment',
         'schedule': 35 * MINUTE,
     },
+    'news_doc2vec': {
+        'task': 'news_doc2vec',
+        'schedule': 5 * MINUTE,
+    },
 }
 
 if __name__ == '__main__':

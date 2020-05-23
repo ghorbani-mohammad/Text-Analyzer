@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import JSONField
 
-# Create your models here.
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -122,6 +122,22 @@ class Sentiment(models.Model):
     class Meta:
        managed = False
        db_table = 'news_sentiment'
+    
+    def __str__(self):
+        return '{}'.format(self.id)
+
+
+class Doc2vec(models.Model):
+    news_id = models.OneToOneField('News', related_name='doc2vecs', related_query_name='doc2vec',
+                                 on_delete=models.CASCADE, db_column='news_id')
+    vector = JSONField()
+    vector_norm = models.FloatField(default=0.0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+       managed = False
+       db_table = 'news_vector'
     
     def __str__(self):
         return '{}'.format(self.id)
