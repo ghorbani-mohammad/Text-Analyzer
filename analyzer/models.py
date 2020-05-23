@@ -108,3 +108,20 @@ class Geo(models.Model):
     def __str__(self):
         return '{}'.format(self.id)
                         
+
+class Sentiment(models.Model):
+    news_id = models.OneToOneField('News', related_name='sentiments', related_query_name='sentiment',
+                                 on_delete=models.CASCADE, db_column='news_id')
+    neg = models.FloatField(default=0.0)
+    pos = models.FloatField(default=0.0)
+    neu = models.FloatField(default=0.0)
+    compound = models.FloatField(default=0.0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+       managed = False
+       db_table = 'news_sentiment'
+    
+    def __str__(self):
+        return '{}'.format(self.id)

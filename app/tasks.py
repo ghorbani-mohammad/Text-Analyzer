@@ -11,9 +11,10 @@ from geopy.geocoders import Nominatim
 
 from .celery import app
 from celery import current_app
-from analyzer.models import News, Option, Operation, Keyword, Ner, Geo
+from analyzer.models import News, Option, Operation, Keyword, Ner, Geo, Sentiment
 from analyzer.keyword import keywordAnalyzer
 from analyzer.ner import ner
+from analyzer.sentiment import sentimentAnalyzer
 
 
 logger = logging.getLogger('django')
@@ -159,3 +160,15 @@ def proper_gpe(gpe_id, number_of_try):
     except Exception as e:
         proper_gpe(gpe.id, number_of_try)
 
+
+@app.task(name='news_sentiment')
+def news_sentiment():
+    sentiment_analyzer_algorithm = Option.objects.get(key='sentiment_analyzer').value
+    news = Operation.objects.filter(sentiment=False)
+    for item in news[:50]:
+        now = time.strftime("%Y-%m-%d %H:%M:%S")
+        with transaction.atomic():
+            Sentiment.objects.filter(news_id=item.news_id.id).delete()
+            result = sentimentAnalyzer.analyzeSentiment(item.news_id.id, item.news_id.body, now, sentiment_analyzer_algorithm)
+            Sentiment.objects.create(news_id=item.news_id,  neg=round(result['neg'], 2), pos=round(result['pos'], 2), neu=round(result['neu'], 2), compound=round(result['compound'], 2), created_at= now)
+            Operation.objects.filter(news_id=item.news_id).update(sentiment=True)

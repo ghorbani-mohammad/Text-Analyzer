@@ -35,6 +35,10 @@ app.conf.beat_schedule = {
         'task': 'news_geo_extraction',
         'schedule': 25 * MINUTE,
     },
+    'news_sentiment': {
+        'task': 'news_sentiment',
+        'schedule': 35 * MINUTE,
+    },
 }
 
 if __name__ == '__main__':
