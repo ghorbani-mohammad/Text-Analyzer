@@ -16,14 +16,24 @@ app.conf.update(
     result_expires=7200,
 )
 
+MINUTE = 60
+
 app.conf.beat_schedule = {
     'news_mongo_to_postgres': {
         'task': 'news_mongo_to_postgres',
-        'schedule': 5 * 60,
+        'schedule': 15 * MINUTE,
     },
     'news_keyword_extraction': {
         'task': 'news_keyword_extraction',
-        'schedule': 1 * 20,
+        'schedule': 20 * MINUTE,
+    },
+    'news_ner_extraction': {
+        'task': 'news_ner_extraction',
+        'schedule': 10 * MINUTE,
+    },
+    'news_geo_extraction': {
+        'task': 'news_geo_extraction',
+        'schedule': 25 * MINUTE,
     },
 }
 

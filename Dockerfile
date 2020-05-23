@@ -12,6 +12,7 @@ ENV PYTHONUNBUFFERED 1
 # Install pip requirements
 ADD requirements.txt .
 RUN python -m pip install -r requirements.txt
+RUN python -m spacy download en_core_web_sm
 
 WORKDIR /app
 # ADD . /app

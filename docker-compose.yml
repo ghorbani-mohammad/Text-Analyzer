@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   crawler:
-    image: crawler
+    image: analyzer
     container_name: analyzer_django
     command: ["gunicorn", "--bind", "0.0.0.0:8200", "app.wsgi:application"]
     build:
@@ -26,7 +26,7 @@ services:
       driver: none
   
   celery_worker:
-    image: crawler
+    image: analyzer
     container_name: analyzer_celery_worker
     volumes:
       - .:/app
@@ -39,7 +39,7 @@ services:
       DEBUG: 'True'
   
   celery_scheduler:
-    image: crawler
+    image: analyzer
     container_name: analyzer_celery_scheduler
     volumes:
       - .:/app

@@ -39,6 +39,7 @@ class Operation(BaseModel):
     sentiment = models.BooleanField(default=False)
     doc2vec = models.BooleanField(default=False)
     related_news = models.BooleanField(default=False)
+    geo = models.BooleanField(default=False)
 
     def __str__(self):
         return '{}'.format(self.id)
@@ -71,3 +72,39 @@ class Keyword(models.Model):
     
     def __str__(self):
         return '{}'.format(self.id)
+
+
+class Ner(models.Model):
+    news_id = models.OneToOneField('News', related_name='ners', related_query_name='ner',
+                                 on_delete=models.CASCADE, db_column='news_id')
+    entity = models.CharField(max_length=70)
+    type = models.CharField(max_length=70)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+       managed = False
+       db_table = 'news_ner'
+    
+    def __str__(self):
+        return '{}'.format(self.id)
+
+
+class Geo(models.Model):
+    news_id = models.OneToOneField('News', related_name='geos', related_query_name='geo',
+                                 on_delete=models.CASCADE, db_column='news_id')
+    ner_id = models.OneToOneField('Ner', related_name='geos', related_query_name='geo',
+                                 on_delete=models.CASCADE, db_column='ner_id')
+    location = models.CharField(max_length=70)
+    country = models.CharField(max_length=70)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    news_date = models.DateTimeField()
+
+    class Meta:
+       managed = False
+       db_table = 'ner_country'
+    
+    def __str__(self):
+        return '{}'.format(self.id)
+                        
