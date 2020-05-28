@@ -139,7 +139,7 @@ def proper_gpe(gpe_id, number_of_try):
     gpe = Ner.objects.filter(id=gpe_id).first()
     location = gpe.entity
     number_of_try += 1
-    if number_of_try == 10:
+    if number_of_try == 3:
         print('can not resolve {}'.format(location))
         return 0
     try:
@@ -195,7 +195,7 @@ def news_doc2vec():
 def news_related():
     related_extraction_limit = int(Option.objects.get(key='number_of_related_news').value)
     related_extraction_days = int(Option.objects.get(key='past_days_related_news').value)
-    news = Operation.objects.filter(related_news=False)
+    news = Operation.objects.filter(related_news=False, doc2vec=True)
     for item in news[:20]:
         with transaction.atomic():
             Related.objects.filter(news_id=item.news_id.id).delete()
@@ -203,6 +203,6 @@ def news_related():
             obj = []
             now = time.strftime("%Y-%m-%d %H:%M:%S")
             for x in results:
-                obj.append(Related(news_id=News.objects.filter(id=x['news_id']).first(), related_news_id=x['related_news_id'], score=x['score'], created_at=now))
+                obj.append(Related(news_id=item.news_id, related_news_id=x['related_news_id'], score=x['score'], created_at=now))
             Related.objects.bulk_create(obj)
             Operation.objects.filter(news_id=item.news_id).update(related_news=True)

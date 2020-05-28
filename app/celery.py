@@ -16,14 +16,14 @@ app.conf.update(
     result_expires=7200,
 )
 # if you want to purge works queue
-# app.control.purge()
+app.control.purge()
 
 MINUTE = 60
 
 app.conf.beat_schedule = {
     'news_mongo_to_postgres': {
         'task': 'news_mongo_to_postgres',
-        'schedule': 15 * MINUTE,
+        'schedule': 5 * MINUTE,
     },
     'news_keyword_extraction': {
         'task': 'news_keyword_extraction',
@@ -43,11 +43,11 @@ app.conf.beat_schedule = {
     },
     'news_doc2vec': {
         'task': 'news_doc2vec',
-        'schedule': 10 * MINUTE,
+        'schedule': 5 * MINUTE,
     },
     'news_related': {
         'task': 'news_related',
-        'schedule': 15 * MINUTE,
+        'schedule': 10 * MINUTE,
     },
 }
 
