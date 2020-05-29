@@ -11,12 +11,13 @@ from geopy.geocoders import Nominatim
 
 from .celery import app
 from celery import current_app
-from analyzer.models import News, Option, Operation, Keyword, Ner, Geo, Sentiment, Doc2vec, Related
+from analyzer.models import News, Option, Operation, Keyword, Ner, Geo, Sentiment, Doc2vec, Related, NewsCategory, CategoryKeyword, ArmyCategory
 from analyzer.keyword import keywordAnalyzer
 from analyzer.ner import ner
 from analyzer.sentiment import sentimentAnalyzer
 from analyzer.doc2vec import doc2vecAnalyzer
 from analyzer.related import related
+from analyzer.category import categoryx
 
 
 logger = logging.getLogger('django')
@@ -80,7 +81,7 @@ def news_keyword_extraction():
     keyword_extraction_limit = int(Option.objects.get(key='number_of_keywords').value)
     keyword_extraction_algo = Option.objects.get(key='keyword_extraction_algorithm').value
 
-    news = Operation.objects.filter(keyword=False)
+    news = Operation.objects.filter(keyword=False).order_by('-id')
     for item in news[:50]:
         with transaction.atomic():
             Keyword.objects.filter(news_id=item.news_id.id).delete()
@@ -97,7 +98,7 @@ def news_keyword_extraction():
 
 @app.task(name='news_ner_extraction')
 def news_ner_extraction():
-    news = Operation.objects.filter(ner=False)
+    news = Operation.objects.filter(ner=False).order_by('-id')
     ner_extraction_types = Option.objects.get(key='ner_extraction_types').value.replace(' ', '').split(',')
     for item in news[:50]:
         now = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -116,7 +117,7 @@ def news_ner_extraction():
 
 @app.task(name='news_geo_extraction')
 def news_geo_extraction():
-    news = Operation.objects.filter(geo=False)
+    news = Operation.objects.filter(geo=False).order_by('-id')
     for item in news[:50]:
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         with transaction.atomic():
@@ -154,6 +155,8 @@ def proper_gpe(gpe_id, number_of_try):
         if result is None:
             proper_gpe(gpe.id, number_of_try)
         else:
+            if result == 'United States of America':
+                result = 'United States'
             now = time.strftime("%Y-%m-%d %H:%M:%S")
             with transaction.atomic():
                 Geo.objects.create(news_id=gpe.news_id, ner_id=gpe, location=gpe.entity, country=result, created_at=now, news_date=gpe.news_id.date)
@@ -166,7 +169,7 @@ def proper_gpe(gpe_id, number_of_try):
 @app.task(name='news_sentiment')
 def news_sentiment():
     sentiment_analyzer_algorithm = Option.objects.get(key='sentiment_analyzer').value
-    news = Operation.objects.filter(sentiment=False)
+    news = Operation.objects.filter(sentiment=False).order_by('-id')
     for item in news[:50]:
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         with transaction.atomic():
@@ -181,7 +184,7 @@ def news_doc2vec():
     import spacy
     spacy_model = spacy.load("en_core_web_md")
     doc2vec_analyzer_algorithm = Option.objects.get(key='doc2vec_analyzer').value
-    news = Operation.objects.filter(doc2vec=False)
+    news = Operation.objects.filter(doc2vec=False).order_by('-id')
     for item in news[:50]:
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         with transaction.atomic():
@@ -195,7 +198,7 @@ def news_doc2vec():
 def news_related():
     related_extraction_limit = int(Option.objects.get(key='number_of_related_news').value)
     related_extraction_days = int(Option.objects.get(key='past_days_related_news').value)
-    news = Operation.objects.filter(related_news=False, doc2vec=True)
+    news = Operation.objects.filter(related_news=False, doc2vec=True).order_by('-id')
     for item in news[:20]:
         with transaction.atomic():
             Related.objects.filter(news_id=item.news_id.id).delete()
@@ -206,3 +209,23 @@ def news_related():
                 obj.append(Related(news_id=item.news_id, related_news_id=x['related_news_id'], score=x['score'], created_at=now))
             Related.objects.bulk_create(obj)
             Operation.objects.filter(news_id=item.news_id).update(related_news=True)
+
+
+@app.task(name='news_category')
+def news_category():
+    import spacy
+    import numpy as np
+    from string import punctuation
+    spacy_model = spacy.load("en_core_web_md")
+    news = Operation.objects.filter(category=False).order_by('-id')
+    categories = CategoryKeyword.objects.all()
+    for item in news[:20]:
+        results = categoryx.category(spacy_model, np, punctuation, item.news_id, categories)
+        with transaction.atomic():
+            NewsCategory.objects.filter(news_id=item.news_id.id).delete()
+            obj = []
+            now = time.strftime("%Y-%m-%d %H:%M:%S")
+            for x in results:
+                obj.append(NewsCategory(news_id=item.news_id, army_category_id=ArmyCategory.objects.get(id=x), score=results[x], created_at=now))
+            NewsCategory.objects.bulk_create(obj)
+            Operation.objects.filter(news_id=item.news_id).update(category=True)

@@ -157,3 +157,54 @@ class Related(models.Model):
     
     def __str__(self):
         return '{}'.format(self.id)
+
+
+class ArmyCategory(models.Model):
+	label = models.CharField(max_length=70)
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+    
+	class Meta:
+		managed = False
+		db_table = 'army_category'
+
+
+class ArmyKeyword(models.Model):
+	label = models.CharField(max_length=70)
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		managed = False
+		db_table = 'army_keyword'
+
+
+class CategoryKeyword(models.Model):
+	army_category_id = models.OneToOneField('ArmyCategory', related_name='categorykeywords',
+	                                        related_query_name='categorykeyword', on_delete=models.CASCADE,
+	                                        db_column='army_category_id')
+
+
+	army_keyword_id = models.OneToOneField('ArmyKeyword', related_name='keywords',
+	                                        related_query_name='keyword', on_delete=models.CASCADE,
+	                                        db_column='army_keyword_id')
+	class Meta:
+		managed = False
+		db_table = 'category_keyword'
+
+
+class NewsCategory(models.Model):
+	news_id = models.OneToOneField('News', related_name='news', related_query_name='news',
+	                               on_delete=models.CASCADE, db_column='news_id')
+
+
+	army_category_id = models.OneToOneField('ArmyCategory', related_name='newscategories', related_query_name='newscategory',
+	                               on_delete=models.CASCADE, db_column='army_category_id')
+
+	score = models.FloatField(null=True, blank=True, default=None)
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		managed = False
+		db_table = 'news_category'
