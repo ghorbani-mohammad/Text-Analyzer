@@ -18,6 +18,7 @@ from analyzer.sentiment import sentimentAnalyzer
 from analyzer.doc2vec import doc2vecAnalyzer
 from analyzer.related import related
 from analyzer.category import categoryx
+from analyzer.summary import summaryx
 
 
 logger = logging.getLogger('django')
@@ -221,11 +222,34 @@ def news_category():
     categories = CategoryKeyword.objects.all()
     for item in news[:20]:
         results = categoryx.category(spacy_model, np, punctuation, item.news_id, categories)
+        obj = []
+        now = time.strftime("%Y-%m-%d %H:%M:%S")
+        for x in results:
+            obj.append(NewsCategory(news_id=item.news_id, army_category_id=ArmyCategory.objects.get(id=x), score=results[x], created_at=now))
         with transaction.atomic():
             NewsCategory.objects.filter(news_id=item.news_id.id).delete()
-            obj = []
-            now = time.strftime("%Y-%m-%d %H:%M:%S")
-            for x in results:
-                obj.append(NewsCategory(news_id=item.news_id, army_category_id=ArmyCategory.objects.get(id=x), score=results[x], created_at=now))
             NewsCategory.objects.bulk_create(obj)
             Operation.objects.filter(news_id=item.news_id).update(category=True)
+
+
+@app.task(name='news_summary')
+def news_summary():
+    from sumy.parsers.plaintext import PlaintextParser
+    from sumy.nlp.tokenizers import Tokenizer
+    from sumy.nlp.stemmers import Stemmer
+    from sumy.summarizers.lsa import LsaSummarizer as Summarizer
+    from sumy.utils import get_stop_words
+    news = Operation.objects.filter(summary=False).order_by('-id')
+    for item in news[:50]:
+        if item.news_id.body is None or item.news_id.body == '':
+            Operation.objects.filter(news_id=item.news_id).update(summary=True)
+            continue
+        result = summaryx.extractSummary(PlaintextParser, Tokenizer, Stemmer, Summarizer, get_stop_words, item.news_id.body)
+        now = time.strftime("%Y-%m-%d %H:%M:%S")
+        with transaction.atomic():
+            item.news_id.summary = result[0]
+            item.news_id.updated_at = now
+            item.news_id.save()
+            Operation.objects.filter(news_id=item.news_id).update(summary=True)
+
+        

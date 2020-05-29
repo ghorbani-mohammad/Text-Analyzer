@@ -53,6 +53,10 @@ app.conf.beat_schedule = {
         'task': 'news_category',
         'schedule': 20 * MINUTE,
     },
+    'news_summary': {
+        'task': 'news_summary',
+        'schedule': 15 * MINUTE,
+    },
 }
 
 if __name__ == '__main__':

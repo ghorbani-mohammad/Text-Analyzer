@@ -16,6 +16,7 @@ class News(models.Model):
     _id = models.CharField(max_length=70)
     title = models.CharField(max_length=70)
     body = models.TextField()
+    summary = models.TextField()
     source = models.CharField(max_length=70)
     agency_id = models.BigIntegerField()
     date = models.DateTimeField()
@@ -40,6 +41,7 @@ class Operation(BaseModel):
     doc2vec = models.BooleanField(default=False)
     related_news = models.BooleanField(default=False)
     geo = models.BooleanField(default=False)
+    summary = models.BooleanField(default=False)
 
     def __str__(self):
         return '{}'.format(self.id)
