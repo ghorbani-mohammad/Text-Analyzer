@@ -37,6 +37,15 @@ class KeywordStrategyC(Keyword):
         return keywords(body_text, words=10, lemmatize=True, deacc=True, split=True)
 
 
+class KeywordStrategyD(Keyword):
+    def analyze(self, body_text, limit):
+        from gensim.summarization import keywords
+        from nltk.stem import WordNetLemmatizer
+        wordnet_lemmatizer = WordNetLemmatizer()
+        results = keywords(body_text, words=10, lemmatize=True, deacc=True, split=True)
+        return [wordnet_lemmatizer.lemmatize(w) for w in results]
+
+
 
 class KeywordAnalyzer():
     def __init__(self, strategy: Keyword, limit):

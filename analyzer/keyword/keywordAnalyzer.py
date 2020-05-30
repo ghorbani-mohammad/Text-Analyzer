@@ -13,5 +13,8 @@ def analyzeKeyword(news_id, text, limit, algo):
     elif algo == "gensim":
         keyword_analyzer = KeywordAnalyzer(KeywordStrategyC(), limit)
         keywords = keyword_analyzer.analyze(text)
+    elif algo == "gensimWithWordNet":
+        keyword_analyzer = KeywordAnalyzer(KeywordStrategyD(), limit)
+        keywords = keyword_analyzer.analyze(text)
     
     return keywords
