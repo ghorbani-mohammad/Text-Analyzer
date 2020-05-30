@@ -6,13 +6,13 @@ class Keyword(ABC):
         pass
 
 class KeywordStrategyA(Keyword):
-    from rake_nltk import Rake
-    from nltk.corpus import stopwords 
 
     def analyze(self, body_text, limit):
+        from rake_nltk import Rake
+        from nltk.corpus import stopwords 
         r = Rake(min_length=1, max_length=1) 
         r.extract_keywords_from_text(body_text)
-        return r.get_ranked_phrases() 
+        return r.get_ranked_phrases()[:limit] 
 
 class KeywordStrategyB(Keyword):
     import spacy
