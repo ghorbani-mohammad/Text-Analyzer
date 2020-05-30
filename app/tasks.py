@@ -92,7 +92,7 @@ def news_keyword_extraction():
             obj = []
             now = time.strftime("%Y-%m-%d %H:%M:%S")
             for keyword in keywords:
-                obj.append(Keyword(news_id=item.news_id, keyword=keyword, created_at=now))
+                obj.append(Keyword(news_id=item.news_id, keyword=keyword, created_at=now, news_date=item.news_id.date))
             Keyword.objects.bulk_create(obj)
             Operation.objects.filter(news_id=item.news_id).update(keyword=True)
 

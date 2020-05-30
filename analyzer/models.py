@@ -67,6 +67,7 @@ class Keyword(models.Model):
     keyword = models.CharField(max_length=70)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    news_date = models.DateTimeField()
 
     class Meta:
        managed = False
