@@ -50,9 +50,7 @@ def news_importer():
     for doc in last_docs[:10]:
         if News.objects.filter(_id=doc['_id']).count():
             continue
-        
-        # filters on body
-        doc['body'] = re.sub(re.compile('<.*?>'), '\n', doc['body'])
+    
 
         print("importing to postgres. doc title is '{}' and source is '{}' ".format(doc['title'], doc['source']))
         now = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -76,6 +74,8 @@ def news_importer():
 
     myclient.close()
 
+def remove_htmls_tags_filter(text):
+    return re.sub(re.compile('<.*?>'), '\n', text)
 
 @app.task(name='news_keyword_extraction')
 def news_keyword_extraction():
@@ -87,6 +87,7 @@ def news_keyword_extraction():
         with transaction.atomic():
             Keyword.objects.filter(news_id=item.news_id.id).delete()
             body = News.objects.get(id=item.news_id.id).body
+            body = remove_htmls_tags_filter(body)
             keywords = keywordAnalyzer.analyzeKeyword(item.news_id.id, body, keyword_extraction_limit, keyword_extraction_algo)
             
             obj = []
@@ -106,7 +107,7 @@ def news_ner_extraction():
         with transaction.atomic():
             Ner.objects.filter(news_id=item.news_id.id).delete()
             news = News.objects.get(id=item.news_id.id)
-            x = ner.NameEntityRecognition(item.news_id.id, news.body, news.date, ner_extraction_types)
+            x = ner.NameEntityRecognition(item.news_id.id, remove_htmls_tags_filter(news.body), news.date, ner_extraction_types)
             results = x.find_NER_tag(now)
             obj = []
             for entity in results.keys():
@@ -118,6 +119,7 @@ def news_ner_extraction():
 
 @app.task(name='news_geo_extraction')
 def news_geo_extraction():
+    use_google_geo = Option.objects.get(key='use_google_geo').value
     news = Operation.objects.filter(geo=False).order_by('-id')
     for item in news[:50]:
         now = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -130,7 +132,8 @@ def news_geo_extraction():
                 if geo:
                     obj.append(Geo(news_id=item.news_id, ner_id=gpe, location=gpe.entity, country=geo.country, created_at=now, news_date=item.news_id.date))
                 else:
-                    proper_gpe.delay(gpe.id, 0)
+                    if use_google_geo == 'True':
+                        proper_gpe.delay(gpe.id, 0)
             Geo.objects.bulk_create(obj)
             Operation.objects.filter(news_id=item.news_id).update(geo=True)
 
@@ -175,7 +178,7 @@ def news_sentiment():
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         with transaction.atomic():
             Sentiment.objects.filter(news_id=item.news_id.id).delete()
-            result = sentimentAnalyzer.analyzeSentiment(item.news_id.id, item.news_id.body, now, sentiment_analyzer_algorithm)
+            result = sentimentAnalyzer.analyzeSentiment(item.news_id.id, remove_htmls_tags_filter(item.news_id.body), now, sentiment_analyzer_algorithm)
             Sentiment.objects.create(news_id=item.news_id,  neg=round(result['neg'], 2), pos=round(result['pos'], 2), neu=round(result['neu'], 2), compound=round(result['compound'], 2), created_at= now)
             Operation.objects.filter(news_id=item.news_id).update(sentiment=True)
 
@@ -190,7 +193,7 @@ def news_doc2vec():
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         with transaction.atomic():
             Doc2vec.objects.filter(news_id=item.news_id.id).delete()
-            vector, vector_norm = doc2vecAnalyzer.analyzeDoc2vec(item.news_id.id, item.news_id.body, now, doc2vec_analyzer_algorithm, spacy_model)
+            vector, vector_norm = doc2vecAnalyzer.analyzeDoc2vec(item.news_id.id, remove_htmls_tags_filter(item.news_id.body), now, doc2vec_analyzer_algorithm, spacy_model)
             Doc2vec.objects.create(news_id=item.news_id, vector=vector, vector_norm=vector_norm, created_at=now)
             Operation.objects.filter(news_id=item.news_id).update(doc2vec=True)
 
@@ -244,7 +247,7 @@ def news_summary():
         if item.news_id.body is None or item.news_id.body == '':
             Operation.objects.filter(news_id=item.news_id).update(summary=True)
             continue
-        result = summaryx.extractSummary(PlaintextParser, Tokenizer, Stemmer, Summarizer, get_stop_words, item.news_id.body)
+        result = summaryx.extractSummary(PlaintextParser, Tokenizer, Stemmer, Summarizer, get_stop_words, remove_htmls_tags_filter(item.news_id.body))
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         with transaction.atomic():
             item.news_id.summary = result[0]
@@ -253,3 +256,5 @@ def news_summary():
             Operation.objects.filter(news_id=item.news_id).update(summary=True)
 
         
+
+
