@@ -28,11 +28,11 @@ class SentimentWords(views.APIView):
 
         for word in tokens_without_sw:
             score = analyzer.polarity_scores(word)['compound']
-            if (score) >= 0.5:
+            if (score) > 0:
                 pos_word_list.append((word, score))
-            elif (score) <= -0.5:
+            elif (score) < 0:
                 neg_word_list.append((word, score))
             else:
                 neu_word_list.append((word, score))           
 
-        return Response({'positive': pos_word_list, 'negative': neg_word_list, 'neutral': neu_word_list})
+        return Response({'positive': set(pos_word_list), 'negative': set(neg_word_list)})
