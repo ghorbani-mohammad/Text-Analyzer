@@ -1,6 +1,38 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from .models import News
-# Create your views here.
+from rest_framework import views
 
+from .models import News
+
+class SentimentWords(views.APIView):
+    def get(self, request, version, news_id):
+        document = get_object_or_404(News, id=news_id)
+        
+        import nltk
+        from nltk.sentiment.vader import SentimentIntensityAnalyzer
+        from nltk.corpus import stopwords
+        nltk.download('vader_lexicon')
+        nltk.download('punkt')
+        nltk.download('stopwords')
+
+
+        analyzer = SentimentIntensityAnalyzer()
+        text_tokens = nltk.word_tokenize(document.body)
+        tokens_without_sw = [word for word in text_tokens if not word in stopwords.words()]
+        tokens_without_sw = [word.lower() for word in tokens_without_sw if word.isalpha()]
+
+
+        pos_word_list=[]
+        neu_word_list=[]
+        neg_word_list=[]
+
+        for word in tokens_without_sw:
+            score = analyzer.polarity_scores(word)['compound']
+            if (score) >= 0.5:
+                pos_word_list.append((word, score))
+            elif (score) <= -0.5:
+                neg_word_list.append((word, score))
+            else:
+                neu_word_list.append((word, score))           
+
+        return Response({'positive': pos_word_list, 'negative': neg_word_list, 'neutral': neu_word_list})
