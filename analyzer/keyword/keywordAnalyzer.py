@@ -17,4 +17,6 @@ def analyzeKeyword(news_id, text, limit, algo):
         keyword_analyzer = KeywordAnalyzer(KeywordStrategyD(), limit)
         keywords = keyword_analyzer.analyze(text)
     
-    return keywords
+    ignore_list = ['said', 'news', 'new', 'case', 'state', 'city', 'State']
+
+    return [keyword for keyword in keywords if keyword not in ignore_list]
