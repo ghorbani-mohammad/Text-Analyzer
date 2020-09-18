@@ -9,8 +9,8 @@ from django.db import transaction
 from datetime import datetime as dt
 from geopy.geocoders import Nominatim
 
+from django.conf import Settings
 from .celery import app
-from celery import current_app
 from analyzer.models import News, Option, Operation, Keyword, Ner, Geo, Sentiment, Doc2vec, Related, NewsCategory, CategoryKeyword, ArmyCategory
 from analyzer.keyword import keywordAnalyzer
 from analyzer.ner import ner
@@ -25,7 +25,7 @@ logger = logging.getLogger('django')
 
 @app.task(name='news_mongo_to_postgres')
 def news_importer():
-    myclient = pymongo.MongoClient("mongodb://138.201.77.42:27017/")
+    myclient = pymongo.MongoClient("mongodb://{}:27017/".format(Settings.SERVRE_IP))
     news_raw = myclient["news_raw"]["news_raw"]
     last_imported_news_id = Option.objects.get(key='last_imported_news').value
     print('last imported news mongo_id was {}'.format(last_imported_news_id))
