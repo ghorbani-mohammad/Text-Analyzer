@@ -25,7 +25,7 @@ logger = logging.getLogger('django')
 
 @app.task(name='news_mongo_to_postgres')
 def news_importer():
-    myclient = pymongo.MongoClient("mongodb://{}:27017/".format(Settings.SERVRE_IP))
+    myclient = pymongo.MongoClient("mongodb://{}:27017/".format(Settings.SERVER_IP))
     news_raw = myclient["news_raw"]["news_raw"]
     last_imported_news_id = Option.objects.get(key='last_imported_news').value
     print('last imported news mongo_id was {}'.format(last_imported_news_id))
