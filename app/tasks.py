@@ -74,6 +74,19 @@ def news_importer():
 
     myclient.close()
 
+
+@app.task(name='news_to_elastic')
+def news_to_elastic():
+    from elasticsearch import Elasticsearch
+    address = 'http://5.9.166.243:9200'
+    es = Elasticsearch([address])
+    index = 'elasticdb'
+    values = ('id', 'title', 'body', 'agency_id', 'date')
+    queryset = News.objects.all().order_by('pk')
+    data = queryset.values(*values)
+    for item in data[:100]:
+        es.index(index, id=item['id'], body={'doc': item})
+
 def remove_htmls_tags_filter(text):
     return re.sub(re.compile('<.*?>'), '\n', text)
 

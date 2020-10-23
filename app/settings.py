@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'analyzer.apps.AnalyzerConfig',
     'clear_cache',
     'corsheaders',
+    'django_elasticsearch_dsl'
 ]
 
 MIDDLEWARE = [
@@ -166,3 +167,10 @@ LOGGING = {
 
 
 CORS_ORIGIN_ALLOW_ALL =True
+
+
+ELASTICSEARCH_DSL={
+    'default': {
+        'hosts': 'localhost:9200'
+    },
+}
