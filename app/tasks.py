@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
-import requests
-import logging, datetime, redis, requests, json
-
+import logging, datetime
+from tqdm import tqdm
 import time
 import pymongo, re
 from bson import ObjectId
@@ -71,21 +70,30 @@ def news_importer():
             Operation.objects.create(
                 news_id = inserted_news
             )
+            news_to_elastic.delay(delete=False, id=inserted_news.id)
 
     myclient.close()
 
 
 @app.task(name='news_to_elastic')
-def news_to_elastic():
+def news_to_elastic(delete=False, id=None):
     from elasticsearch import Elasticsearch
     address = 'http://5.9.166.243:9200'
     es = Elasticsearch([address])
-    index = 'elasticdb'
-    values = ('id', 'title', 'body', 'agency_id', 'date')
-    queryset = News.objects.all().order_by('pk')
+    index_name = 'elasticdb'
+    if delete and es.indices.exists(index=index_name):
+        es.indices.delete(index=index_name)
+    values = ('id', 'title', 'body', 'agency_id', 'source', 'date', '_id')
+    if id is None:
+        queryset = News.objects.all().order_by('pk')
+    else:
+        queryset = News.objects.filter(id=id)
     data = queryset.values(*values)
-    for item in data[:100]:
-        es.index(index, id=item['id'], body={'doc': item})
+    for item in tqdm(data):
+        item['date'] = datetime.datetime.timestamp(item['date'])
+        item['mongo_id'] = item.pop('_id')
+        es.index(index_name, body=item)
+
 
 def remove_htmls_tags_filter(text):
     return re.sub(re.compile('<.*?>'), '\n', text)
