@@ -18,3 +18,4 @@ sumy==0.8.1
 django-cors-headers==3.4.0
 django-elasticsearch-dsl==7.1.4
 ipython==7.9.0
+tqdm==2.2.3
