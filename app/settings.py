@@ -16,6 +16,8 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 SERVER_IP = '5.9.166.243'
+ELASTIC_DB_IP = '9200'
+MONGO_DB_PORT = '27017'
 
 # Application definition
 

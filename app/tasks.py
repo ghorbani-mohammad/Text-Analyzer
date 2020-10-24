@@ -24,7 +24,7 @@ logger = logging.getLogger('django')
 
 @app.task(name='news_mongo_to_postgres')
 def news_importer():
-    myclient = pymongo.MongoClient("mongodb://{}:27017/".format(settings.SERVER_IP))
+    myclient = pymongo.MongoClient("mongodb://{}:{}/".format(settings.SERVER_IP, settings.MONGO_DB_PORT))
     news_raw = myclient["news_raw"]["news_raw"]
     last_imported_news_id = Option.objects.get(key='last_imported_news').value
     print('last imported news mongo_id was {}'.format(last_imported_news_id))
@@ -78,7 +78,7 @@ def news_importer():
 @app.task(name='news_to_elastic')
 def news_to_elastic(delete=False, id=None):
     from elasticsearch import Elasticsearch
-    address = 'http://5.9.166.243:9200'
+    address = 'http://{}:{}'.format(settings.SERVER_IP, settings.ELASTIC_DB_IP)
     es = Elasticsearch([address])
     index_name = 'elasticdb'
     if delete and es.indices.exists(index=index_name):
@@ -275,7 +275,3 @@ def news_summary():
             item.news_id.updated_at = now
             item.news_id.save()
             Operation.objects.filter(news_id=item.news_id).update(summary=True)
-
-        
-
-
