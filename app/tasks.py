@@ -89,7 +89,7 @@ def news_to_elastic(delete=False, id=None):
     else:
         queryset = News.objects.filter(id=id)
     data = queryset.values(*values)
-    for item in tqdm(data):
+    for item in data:
         item['date'] = datetime.datetime.timestamp(item['date'])
         item['mongo_id'] = item.pop('_id')
         es.index(index_name, body=item)
