@@ -78,7 +78,7 @@ def news_importer():
 @app.task(name='news_to_elastic')
 def news_to_elastic(delete=False, id=None):
     from elasticsearch import Elasticsearch
-    address = 'http://{}:{}'.format(settings.SERVER_IP, settings.ELASTIC_DB_IP)
+    address = 'http://{}:{}'.format(settings.SERVER_IP, settings.ELASTIC_DB_PORT)
     es = Elasticsearch([address])
     index_name = 'elasticdb'
     if delete and es.indices.exists(index=index_name):
@@ -89,10 +89,16 @@ def news_to_elastic(delete=False, id=None):
     else:
         queryset = News.objects.filter(id=id)
     data = queryset.values(*values)
-    for item in data:
-        item['date'] = datetime.datetime.timestamp(item['date'])
-        item['mongo_id'] = item.pop('_id')
-        es.index(index_name, body=item)
+    if delete:
+        for item in tqdm(data):
+            item['date'] = datetime.datetime.timestamp(item['date'])
+            item['mongo_id'] = item.pop('_id')
+            es.index(index_name, body=item)
+    else:
+        for item in data:
+            item['date'] = datetime.datetime.timestamp(item['date'])
+            item['mongo_id'] = item.pop('_id')
+            es.index(index_name, body=item)
 
 
 def remove_htmls_tags_filter(text):
