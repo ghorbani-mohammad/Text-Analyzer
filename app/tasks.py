@@ -85,7 +85,7 @@ def news_to_elastic(delete=False, id=None):
         es.indices.delete(index=index_name)
     values = ('id', 'title', 'body', 'agency_id', 'source', 'date', '_id')
     if id is None:
-        queryset = News.objects.all().order_by('pk')
+        queryset = News.objects.all().order_by('-pk')
     else:
         queryset = News.objects.filter(id=id)
     data = queryset.values(*values)
