@@ -1,9 +1,9 @@
 version: '3.4'
 
 services:
-  crawler:
-    image: analyzer
+  analyzer_django:
     container_name: analyzer_django
+    image: analyzer
     # command: ["gunicorn", "--bind", "0.0.0.0:8200", "app.wsgi:application"]
     command: ["python", "/app/manage.py", "runserver", "0:80"]
     ports:
@@ -18,7 +18,7 @@ services:
     environment:
       DEBUG: 'True'
   
-  redis:
+  analyzer_redis:
     image: redis
     container_name: analyzer_redis
     volumes: 
@@ -28,9 +28,9 @@ services:
     logging:
       driver: none
   
-  celery_worker:
+  analyzer_worker:
     image: analyzer
-    container_name: analyzer_celery_worker
+    container_name: analyzer_worker
     volumes:
       - .:/app
     command: ["celery", "-A", "app", "worker", "-l", "info", "--pidfile="]
@@ -41,9 +41,9 @@ services:
     environment:
       DEBUG: 'True'
   
-  celery_scheduler:
+  analyzer_beat:
     image: analyzer
-    container_name: analyzer_celery_scheduler
+    container_name: analyzer_beat
     volumes:
       - .:/app
     command: ["celery", "-A", "app", "beat", "-l", "info", "--pidfile="]
