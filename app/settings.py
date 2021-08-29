@@ -1,4 +1,7 @@
 import os
+import environ
+
+env = environ.Env()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -15,9 +18,28 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-SERVER_IP = '5.9.166.243'
+SERVER_IP = env.str('SERVER_IP')
 ELASTIC_DB_PORT = '9200'
 MONGO_DB_PORT = '27017'
+ELASTICSEARCH_DSL={
+    'default': {
+        'hosts': 'localhost:9200'
+    },
+}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'OPTIONS': {
+            'options': '-c search_path=army'
+        },
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'army',
+        'HOST': SERVER_IP,
+        'PORT': '5433',
+    },
+}
+
 
 # Application definition
 
@@ -72,19 +94,7 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'OPTIONS': {
-            'options': '-c search_path=army'
-        },
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'army',
-        'HOST': SERVER_IP,
-        'PORT': '5433',
-    },
-}
+
 
 
 # Password validation
@@ -169,10 +179,3 @@ LOGGING = {
 
 
 CORS_ORIGIN_ALLOW_ALL =True
-
-
-ELASTICSEARCH_DSL={
-    'default': {
-        'hosts': 'localhost:9200'
-    },
-}
