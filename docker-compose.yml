@@ -17,6 +17,11 @@ services:
       - .:/app
     restart: unless-stopped
     # network_mode: host
+    logging:
+      driver: json-file
+      options:
+        max-file: '3'
+        max-size: 15m
     environment:
       DEBUG: 'True'
   
@@ -40,8 +45,11 @@ services:
     command: ["celery", "-A", "app", "worker", "-l", "info", "--pidfile="]
     restart: always
     # network_mode: host
-    # logging:
-    #   driver: none
+    logging:
+      driver: json-file
+      options:
+        max-file: '3'
+        max-size: 15m
     environment:
       DEBUG: 'True'
   
@@ -55,8 +63,11 @@ services:
     command: ["celery", "-A", "app", "beat", "-l", "info", "--pidfile="]
     restart: always
     # network_mode: host
-    # logging:
-    #   driver: none
+    logging:
+      driver: json-file
+      options:
+        max-file: '3'
+        max-size: 15m
     environment:
       DEBUG: 'True'
   
