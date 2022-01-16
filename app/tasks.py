@@ -77,6 +77,7 @@ def news_importer():
 
 @app.task(name='news_to_elastic')
 def news_to_elastic(delete=False, id=None):
+    return 0
     from elasticsearch import Elasticsearch
     address = 'http://{}:{}'.format(settings.SERVER_IP, settings.ELASTIC_DB_PORT)
     es = Elasticsearch([address])
