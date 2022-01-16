@@ -19,6 +19,9 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 SERVER_IP = env.str('SERVER_IP')
+DB_PORT = env.str('DB_PORT')
+DB_USER = env.str('DB_USER')
+DB_PASS = env.str('DB_PASS')
 ELASTIC_DB_PORT = '9200'
 MONGO_DB_PORT = '27017'
 ELASTICSEARCH_DSL={
@@ -33,10 +36,10 @@ DATABASES = {
             'options': '-c search_path=army'
         },
         'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'army',
+        'USER': DB_USER,
+        'PASSWORD': DB_PASS,
         'HOST': SERVER_IP,
-        'PORT': '5433',
+        'PORT': DB_PORT,
     },
 }
 
