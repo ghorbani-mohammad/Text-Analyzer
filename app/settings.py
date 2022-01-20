@@ -38,7 +38,7 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
-        'HOST': SERVER_IP,
+        'HOST': 'rasad_postgres',
         'PORT': DB_PORT,
     },
 }

@@ -71,5 +71,7 @@ services:
     environment:
       DEBUG: 'True'
   
-  
-      
+networks:
+  default:
+    external:
+      name: army
