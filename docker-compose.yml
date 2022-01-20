@@ -4,7 +4,6 @@ services:
   analyzer_django:
     container_name: analyzer_django
     image: analyzer
-    # command: ["gunicorn", "--bind", "0.0.0.0:8200", "app.wsgi:application"]
     command: ["python", "/app/manage.py", "runserver", "0:80"]
     ports:
       - 8201:80
@@ -16,24 +15,13 @@ services:
     volumes:
       - .:/app
     restart: unless-stopped
-    # network_mode: host
-    logging:
-      driver: json-file
-      options:
-        max-file: '3'
-        max-size: 15m
-    environment:
-      DEBUG: 'True'
   
   analyzer_redis:
     image: redis
     container_name: analyzer_redis
     volumes: 
       - ./redis:/data
-    restart: always
-    # network_mode: host
-    logging:
-      driver: none
+    restart: unless-stopped
   
   analyzer_worker:
     image: analyzer
@@ -43,15 +31,7 @@ services:
     volumes:
       - .:/app
     command: ["celery", "-A", "app", "worker", "-l", "info", "--pidfile="]
-    restart: always
-    # network_mode: host
-    logging:
-      driver: json-file
-      options:
-        max-file: '3'
-        max-size: 15m
-    environment:
-      DEBUG: 'True'
+    restart: unless-stopped
   
   analyzer_beat:
     image: analyzer
@@ -62,14 +42,6 @@ services:
       - .:/app
     command: ["celery", "-A", "app", "beat", "-l", "info", "--pidfile="]
     restart: always
-    # network_mode: host
-    logging:
-      driver: json-file
-      options:
-        max-file: '3'
-        max-size: 15m
-    environment:
-      DEBUG: 'True'
   
 networks:
   default:
