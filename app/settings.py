@@ -53,9 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    # Our apps
     'rest_framework',
+
     'analyzer.apps.AnalyzerConfig',
     'clear_cache',
     'corsheaders',
