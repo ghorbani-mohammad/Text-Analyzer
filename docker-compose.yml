@@ -4,12 +4,12 @@ services:
   analyzer_django:
     container_name: analyzer_django
     image: analyzer
-    command: ["python", "/app/analyzer/manage.py", "runserver", "0:80"]
-    ports:
-      - 8201:80
     build:
       context: .
       dockerfile: Dockerfile
+    command: ["python", "/app/analyzer/manage.py", "runserver", "0:80"]
+    ports:
+      - 8201:80
     env_file:
       - .env
     volumes:

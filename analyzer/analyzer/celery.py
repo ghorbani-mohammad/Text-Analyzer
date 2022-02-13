@@ -4,7 +4,7 @@ from django.conf import settings
 from celery import Celery
 
 # set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'analyzer.settings')
 
 # TODO: redis port and ip and db must be dynamic
 app = Celery('app')
