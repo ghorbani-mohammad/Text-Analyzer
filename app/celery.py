@@ -56,6 +56,3 @@ app.conf.beat_schedule = {
         'schedule': 15 * MINUTE,
     },
 }
-
-if __name__ == '__main__':
-    app.start()
