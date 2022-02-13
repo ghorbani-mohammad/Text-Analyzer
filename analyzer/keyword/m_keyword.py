@@ -4,7 +4,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import  pandas as pd
+import pandas as pd
 import os
 import sys
 from collections import OrderedDict
@@ -33,7 +33,9 @@ class TextRank4Keyword:
         self.steps = 10  # iteration steps
         self.node_weight = None  # save keywords and its weight
         self.normalizer = Normalizer()
-        self.stop_words = [line.rstrip('/n') for line in open('./stop_words.txt', encoding="utf8")]
+        self.stop_words = [
+            line.rstrip('/n') for line in open('./stop_words.txt', encoding="utf8")
+        ]
 
     def normalize_text(self, text):
         return self.normalizer.normalize(text)
@@ -94,7 +96,9 @@ class TextRank4Keyword:
             g[i][j] = 1
         g = self.symmetrize(g)
         norm = np.sum(g, axis=0)
-        g_norm = np.divide(g, norm, where=norm != 0)  # this is ignore the 0 element in norm
+        g_norm = np.divide(
+            g, norm, where=norm != 0
+        )  # this is ignore the 0 element in norm
         return g_norm
 
     def calculate_score(self, vocab, matrix):
@@ -113,9 +117,11 @@ class TextRank4Keyword:
 
     def get_keywords(self, node_weights, number=3):
         # out_file = open('WordOut_' + file_name, 'w', encoding="utf8")
-        node_weight = OrderedDict(sorted(node_weights.items(), key=lambda t: t[1], reverse=True))
+        node_weight = OrderedDict(
+            sorted(node_weights.items(), key=lambda t: t[1], reverse=True)
+        )
         ##print('Keywords')
-        keywords=[]
+        keywords = []
         for i, (key, value) in enumerate(node_weight.items()):
             # out_file.write(key + ' - ' + str(value)+'/n')
             keywords.append(key)
@@ -130,7 +136,7 @@ class TextRank4Keyword:
             sentence_candid_phrases = []
             tokens = tokenizer.tokenize_words(sentence)
             tagss = my_tagger.parse(tokens)
-            #print(tagss)
+            # print(tagss)
 
             candid_phrase = []
             for i, token in enumerate(tokens):
@@ -138,7 +144,9 @@ class TextRank4Keyword:
                     token = token.replace(u'/u200c', ' ')
                     candid_phrase.append(token)
                 else:
-                    if len(candid_phrase) > 1 and (tagss[i][1] == 'N_SING' or tagss[i][1] == 'Ne' or True):
+                    if len(candid_phrase) > 1 and (
+                        tagss[i][1] == 'N_SING' or tagss[i][1] == 'Ne' or True
+                    ):
                         sentence_candid_phrases.append(candid_phrase)
                     candid_phrase = []
             all_candid_phrases.append(sentence_candid_phrases)
@@ -159,9 +167,11 @@ class TextRank4Keyword:
 
     def get_keyphrases(self, phrase_weights, number=1):
         # out_file = open('PhraseOut_' + file_name, 'w', encoding="utf8")
-        node_weight = OrderedDict(sorted(phrase_weights.items(), key=lambda t: t[1], reverse=True))
+        node_weight = OrderedDict(
+            sorted(phrase_weights.items(), key=lambda t: t[1], reverse=True)
+        )
         ##print('keypharase')
-        key_ph=[]
+        key_ph = []
         for i, (key, value) in enumerate(node_weight.items()):
             # out_file.write(key + ' - ' + str(value) + '/n')
 
@@ -174,66 +184,72 @@ class TextRank4Keyword:
 
 def analyze_files(text):
     tr4w = TextRank4Keyword()
-    text_normalized =text
+    text_normalized = text
     sentences = tr4w.get_sentences(text_normalized)
-    sentences_processed = tr4w.prepare_sentences(sentences, ['N','Ne','N_SING','ADJ','Aje','AJ', "ADV_COMP"])
+    sentences_processed = tr4w.prepare_sentences(
+        sentences, ['N', 'Ne', 'N_SING', 'ADJ', 'Aje', 'AJ', "ADV_COMP"]
+    )
     vocab = tr4w.get_vocab(sentences_processed)
     token_pairs = tr4w.get_token_pairs(4, sentences_processed)
     matrix = tr4w.get_matrix(vocab, token_pairs)
     scores = tr4w.calculate_score(vocab, matrix)
-    kw=tr4w.get_keywords( scores)
-    phrases = tr4w.get_phrases(sentences, [ 'ADJ','N_SING'])
+    kw = tr4w.get_keywords(scores)
+    phrases = tr4w.get_phrases(sentences, ['ADJ', 'N_SING'])
     phrases_score = tr4w.score_phrase(phrases, scores)
-    kp=tr4w.get_keyphrases( phrases_score)
-    return kw,kp
+    kp = tr4w.get_keyphrases(phrases_score)
+    return kw, kp
 
 
 def keyword_keyphrase():
-  key_phrase={}
-  key_words={}
-  all_twiit=[]
-  number_file=0
-  import  string
-  alpha=list(string.ascii_lowercase)+list(string.ascii_uppercase)
-  alpha.append('@')
-  alpha.append('#')
+    key_phrase = {}
+    key_words = {}
+    all_twiit = []
+    number_file = 0
+    import string
 
-  key_phrase = {}
-  key_words = {}
+    alpha = list(string.ascii_lowercase) + list(string.ascii_uppercase)
+    alpha.append('@')
+    alpha.append('#')
 
-  data=pd.read_excel('./input/formaled_data.xlsx')
-  for row in range(data.shape[0]):
-      
-      com=str(data['stemmer'].iloc[row])
-      com=com.replace("_"," ")
-      kw, kp = analyze_files(com)
-      for k in kp:
+    key_phrase = {}
+    key_words = {}
 
-          if k in key_phrase:
-              key_phrase[k] += 1
-          else:
-              if  list(filter(k.startswith, alpha)) != [] :
-                  continue
-                  #print("yes")
-              else:
-                  key_phrase[k] = 1
+    data = pd.read_excel('./input/formaled_data.xlsx')
+    for row in range(data.shape[0]):
 
-      for k in kw:
+        com = str(data['stemmer'].iloc[row])
+        com = com.replace("_", " ")
+        kw, kp = analyze_files(com)
+        for k in kp:
 
-          if k in key_words:
-              key_words[k] += 1
-          else:
-              if  list(filter(k.startswith, alpha)) != []   :
-                   continue
+            if k in key_phrase:
+                key_phrase[k] += 1
+            else:
+                if list(filter(k.startswith, alpha)) != []:
+                    continue
+                    # print("yes")
+                else:
+                    key_phrase[k] = 1
 
-              else:
-                  key_words[k] = 1
-  final_keywords={key:key_words[key] for key in key_words if key_words[key]>2 and len(key)>=2 }
-  df = pd.DataFrame(key_phrase.items())
+        for k in kw:
 
-  df.to_excel("./output/keyphrases.xlsx")
+            if k in key_words:
+                key_words[k] += 1
+            else:
+                if list(filter(k.startswith, alpha)) != []:
+                    continue
 
-  df = pd.DataFrame(final_keywords.items())
-  df.to_excel("./output/keywords.xlsx")
+                else:
+                    key_words[k] = 1
+    final_keywords = {
+        key: key_words[key] for key in key_words if key_words[key] > 2 and len(key) >= 2
+    }
+    df = pd.DataFrame(key_phrase.items())
+
+    df.to_excel("./output/keyphrases.xlsx")
+
+    df = pd.DataFrame(final_keywords.items())
+    df.to_excel("./output/keywords.xlsx")
+
 
 keyword_keyphrase()
