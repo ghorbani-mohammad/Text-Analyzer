@@ -1,20 +1,17 @@
 from __future__ import absolute_import, unicode_literals
 import os
+from django.conf import settings
 from celery import Celery
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
 
 # TODO: redis port and ip and db must be dynamic
-app = Celery('app',
-             broker='redis://analyzer_redis:6379/10',
-             backend='redis://analyzer_redis:6379/10',
-             include=['app.tasks'])
-
+app = Celery('app')
 # Optional configuration, see the application user guide.
-app.conf.update(
-    result_expires=7200,
-)
+app.conf.update(result_expires=7200)
+app.config_from_object('django.conf:settings')
+app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 # if you want to purge works queue
 app.control.purge()
 

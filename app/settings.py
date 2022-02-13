@@ -24,17 +24,13 @@ DB_USER = env.str('DB_USER')
 DB_PASS = env.str('DB_PASS')
 ELASTIC_DB_PORT = '9200'
 MONGO_DB_PORT = '27017'
-ELASTICSEARCH_DSL={
-    'default': {
-        'hosts': 'localhost:9200'
-    },
+ELASTICSEARCH_DSL = {
+    'default': {'hosts': 'localhost:9200'},
 }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'OPTIONS': {
-            'options': '-c search_path=army'
-        },
+        'OPTIONS': {'options': '-c search_path=army'},
         'NAME': 'postgres',
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
@@ -54,11 +50,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-
     'analyzer.apps.AnalyzerConfig',
     'clear_cache',
     'corsheaders',
-    'django_elasticsearch_dsl'
+    'django_elasticsearch_dsl',
 ]
 
 MIDDLEWARE = [
@@ -69,7 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -95,8 +90,6 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
-
 
 
 # Password validation
@@ -144,40 +137,13 @@ REST_FRAMEWORK = {
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
 }
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': 'info.log',
-            'formatter':'main_formatter'
-        },
-        'null': {
-            'class': 'logging.NullHandler',
-        },
-    },
-    'formatters': {
-        'main_formatter': {
-            'format': '(%(asctime)s; %(filename)s:%(lineno)d)'
-                      '%(levelname)s:%(name)s: %(message)s ',
-            'datefmt': "%Y-%m-%d %H:%M:%S",
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'django.server': {
-            'handlers': ['null'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-    },
-}
 
+CORS_ORIGIN_ALLOW_ALL = True
 
-CORS_ORIGIN_ALLOW_ALL =True
+# Celery
+BROKER_URL = 'redis://analyzer_redis:6379/10'
+CELERY_RESULT_BACKEND = 'redis://analyzer_redis:6379/10'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Tehran'
