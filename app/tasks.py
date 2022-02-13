@@ -69,11 +69,8 @@ def news_importer():
     for doc in last_docs[:10]:
         if News.objects.filter(_id=doc['_id']).count():
             continue
-        print(
-            f"importing to postgres.title is <{doc['title']}> and source is <{doc['source']}>"
-        )
+        print(f"to-> postgres.title is {doc['title']} and source is {doc['source']}")
         now = time.strftime("%Y-%m-%d %H:%M:%S")
-
         with transaction.atomic():
             inserted_news = News.objects.create(
                 _id=str(doc['_id']),
@@ -91,7 +88,6 @@ def news_importer():
             )
             Operation.objects.create(news_id=inserted_news)
             news_to_elastic.delay(delete=False, id=inserted_news.id)
-
     myclient.close()
 
 
