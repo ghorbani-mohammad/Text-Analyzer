@@ -93,7 +93,7 @@ def news_importer():
 
 @app.task(name='news_to_elastic')
 def news_to_elastic(delete=False, id=None):
-    address = f'http://{settings.SERVER_IP}:{settings.ELASTIC_DB_PORT}'
+    address = f'http://elasticsearch:{settings.ELASTIC_DB_PORT}'
     es = Elasticsearch([address])
     index_name = 'elasticdb'
     if delete and es.indices.exists(index=index_name):
