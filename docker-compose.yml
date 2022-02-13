@@ -31,7 +31,7 @@ services:
     volumes:
       - .:/app
     working_dir: /app/analyzer
-    command: ["celery", "-A", "analyzer", "worker", "-l", "info", "--pidfile="]
+    command: ["celery", "-A", "analyzer_app", "worker", "-l", "info", "--pidfile="]
     restart: unless-stopped
   
   analyzer_beat:
@@ -42,7 +42,7 @@ services:
     volumes:
       - .:/app
     working_dir: /app/analyzer
-    command: ["celery", "-A", "analyzer", "beat", "-l", "info", "--pidfile="]
+    command: ["celery", "-A", "analyzer_app", "beat", "-l", "info", "--pidfile="]
     restart: unless-stopped
   
 networks:

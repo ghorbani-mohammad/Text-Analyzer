@@ -1,10 +1,9 @@
-from django.contrib import admin
-from django.urls import path, re_path, include
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns 
+from django.urls import path, include
+from rest_framework import routers
+
+from .views import SentimentWords
+
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    re_path('api/(?P<version>(v1|v2))/', include('analyzer.urls'))
+    path('sentiment_words/<int:news_id>/', SentimentWords.as_view()),
 ]
-
-urlpatterns += staticfiles_urlpatterns()
