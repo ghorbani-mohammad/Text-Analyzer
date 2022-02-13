@@ -1,0 +1,16 @@
+__pycache__/
+.idea
+.vscode
+.env
+*.log
+*.pot
+*.pyc
+*.sql
+*.sql.gz
+db.sqlite3
+local_settings.py
+todo
+venv
+analyzer/celerybeat-schedule
+analyzer/celerybeat.pid
+analyzer/static
