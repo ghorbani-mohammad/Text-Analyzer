@@ -99,10 +99,10 @@ def news_to_elastic(delete=False, id=None):
     if delete and es.indices.exists(index=index_name):
         es.indices.delete(index=index_name)
     values = ('id', 'title', 'body', 'agency_id', 'source', 'date', '_id')
-    if id is None:
-        queryset = News.objects.all().order_by('-pk')
-    else:
+    if id:
         queryset = News.objects.filter(id=id)
+    else:
+        queryset = News.objects.all().order_by('-pk')
     data = queryset.values(*values)
     if delete:
         for item in tqdm(data):
