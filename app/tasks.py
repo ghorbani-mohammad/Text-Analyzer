@@ -102,18 +102,20 @@ def news_to_elastic(delete=False, id=None):
     if id:
         queryset = News.objects.filter(id=id)
     else:
-        queryset = News.objects.all().order_by('-pk')
-    data = queryset.values(*values)
-    if delete:
-        for item in tqdm(data):
-            item['date'] = datetime.datetime.timestamp(item['date'])
-            item['mongo_id'] = item.pop('_id')
-            es.index(index_name, body=item)
-    else:
+        queryset = News.objects.order_by('-pk')
+    batch_size = 10000
+    step = 0
+    total = queryset.count()
+    while True:
+        data = queryset[step * batch_size : min((step + 1) * batch_size, total)]
+        data = data.values(*values)
         for item in data:
             item['date'] = datetime.datetime.timestamp(item['date'])
             item['mongo_id'] = item.pop('_id')
             es.index(index_name, body=item)
+        if (step + 1) * batch_size >= total:
+            break
+        step += 1
 
 
 def remove_htmls_tags_filter(text):
