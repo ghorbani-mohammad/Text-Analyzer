@@ -1,14 +1,16 @@
 from __future__ import absolute_import, unicode_literals
-import logging, datetime
-from tqdm import tqdm
 import time
 import pymongo, re
+from tqdm import tqdm
+import logging, datetime
 from bson import ObjectId
-from django.db import transaction
+from string import punctuation
 from datetime import datetime as dt
 from geopy.geocoders import Nominatim
+from elasticsearch import Elasticsearch
 
 from django.conf import settings
+from django.db import transaction
 from .celery import app
 from analyzer.models import (
     News,
@@ -57,11 +59,7 @@ def news_importer():
     }
 
     last_docs_count = news_raw.count_documents(_filter)
-    print(
-        '{} number of documents are queued to insert to postgres'.format(
-            last_docs_count
-        )
-    )
+    print(f'{last_docs_count} number of documents are queued to insert to postgres')
 
     # Getting news that must be imported to postgres from mongo
     last_docs = news_raw.find(
@@ -71,11 +69,8 @@ def news_importer():
     for doc in last_docs[:10]:
         if News.objects.filter(_id=doc['_id']).count():
             continue
-
         print(
-            "importing to postgres. doc title is '{}' and source is '{}' ".format(
-                doc['title'], doc['source']
-            )
+            f"importing to postgres.title is <{doc['title']}> and source is <{doc['source']}>"
         )
         now = time.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -102,10 +97,7 @@ def news_importer():
 
 @app.task(name='news_to_elastic')
 def news_to_elastic(delete=False, id=None):
-    return 0
-    from elasticsearch import Elasticsearch
-
-    address = 'http://{}:{}'.format(settings.SERVER_IP, settings.ELASTIC_DB_PORT)
+    address = f'http://{settings.SERVER_IP}:{settings.ELASTIC_DB_PORT}'
     es = Elasticsearch([address])
     index_name = 'elasticdb'
     if delete and es.indices.exists(index=index_name):
@@ -237,7 +229,7 @@ def proper_gpe(gpe_id, number_of_try):
     location = gpe.entity
     number_of_try += 1
     if number_of_try == 3:
-        print('can not resolve {}'.format(location))
+        print(f'can not resolve {location}')
         return 0
     try:
         geolocator = Nominatim(user_agent='hemmat')
@@ -355,7 +347,6 @@ def news_related():
 def news_category():
     import spacy
     import numpy as np
-    from string import punctuation
 
     spacy_model = spacy.load("en_core_web_md")
     news = Operation.objects.filter(category=False).order_by('-id')
