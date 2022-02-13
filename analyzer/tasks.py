@@ -11,7 +11,7 @@ from elasticsearch import Elasticsearch
 
 from django.conf import settings
 from django.db import transaction
-from .celery import app
+from app.celery import app
 from analyzer.models import (
     News,
     Option,
