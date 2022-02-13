@@ -1,4 +1,6 @@
-def extractSummary(PlaintextParser, Tokenizer, Stemmer, Summarizer, get_stop_words, body):
+def extractSummary(
+    PlaintextParser, Tokenizer, Stemmer, Summarizer, get_stop_words, body
+):
     LANGUAGE = "english"
     SENTENCES_COUNT = 1
 

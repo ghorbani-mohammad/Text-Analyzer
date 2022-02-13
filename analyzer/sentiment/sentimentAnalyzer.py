@@ -11,5 +11,4 @@ def analyzeSentiment(news_id, body_text, now, config):
     else:
         sentiment_analyzer = SentimentAnalyzer(SentimentStrategyA())
         x = sentiment_analyzer.analyze(body_text)
-    return x 
-    
+    return x

@@ -5,14 +5,13 @@ import datetime
 from analyzer.models import Doc2vec
 
 
-def relatedNews(news_id, limit,  days):
+def relatedNews(news_id, limit, days):
     temp = []
 
     # Retrieve news vector
     news_vect = Doc2vec.objects.filter(news_id=news_id).first().vector
     # convert from string to array
     news_vect = news_vect.strip('][').split(', ')
-
 
     today = datetime.date.today()
     first = today.replace(day=1)
@@ -29,12 +28,12 @@ def relatedNews(news_id, limit,  days):
         temp.append((news_id, score))
 
     related_news = sorted(temp, key=lambda tup: tup[1], reverse=True)
-    related_news = related_news[1:min(limit, len(candids))]
+    related_news = related_news[1 : min(limit, len(candids))]
 
-    if(len(related_news)==0):
+    if len(related_news) == 0:
         return
 
     result = []
     for news in related_news:
-        result.append(dict(news_id= news_id, related_news_id= news[0], score= news[1]))
+        result.append(dict(news_id=news_id, related_news_id=news[0], score=news[1]))
     return result
