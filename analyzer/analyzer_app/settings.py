@@ -57,7 +57,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
 ]
 
-ROOT_URLCONF = "analyzer.urls"
+ROOT_URLCONF = "analyzer_app.urls"
 
 TEMPLATES = [
     {
@@ -75,7 +75,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "analyzer.wsgi.application"
+WSGI_APPLICATION = "analyzer_app.wsgi.application"
 
 
 AUTH_PASSWORD_VALIDATORS = [
