@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "algorithm",
+    "analyzer",
     "clear_cache",
     "corsheaders",
     "django_elasticsearch_dsl",
