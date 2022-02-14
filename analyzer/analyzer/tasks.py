@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 import time
+import numpy as np
 import pymongo, re
-from tqdm import tqdm
 import logging, datetime
 from bson import ObjectId
 from string import punctuation
@@ -10,6 +10,7 @@ from geopy.geocoders import Nominatim
 from elasticsearch import Elasticsearch
 
 from django.conf import settings
+from .apps import AnalyzerConfig
 from django.db import transaction
 from analyzer_app.celery import app
 from analyzer.models import (
@@ -287,9 +288,7 @@ def news_sentiment():
 
 @app.task(name="news_doc2vec")
 def news_doc2vec():
-    import spacy
-
-    spacy_model = spacy.load("en_core_web_md")
+    spacy_model = AnalyzerConfig.spacy_model
     doc2vec_analyzer_algorithm = Option.objects.get(key="doc2vec_analyzer").value
     news = Operation.objects.filter(doc2vec=False).order_by("-id")
     for item in news[:50]:
@@ -344,10 +343,7 @@ def news_related():
 
 @app.task(name="news_category")
 def news_category():
-    import spacy
-    import numpy as np
-
-    spacy_model = spacy.load("en_core_web_md")
+    spacy_model = AnalyzerConfig.spacy_model
     news = Operation.objects.filter(category=False).order_by("-id")
     categories = CategoryKeyword.objects.all()
     for item in news[:20]:
