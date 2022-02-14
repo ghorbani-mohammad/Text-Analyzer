@@ -18,3 +18,4 @@ class OperationAdmin(admin.ModelAdmin):
         "summary",
         "created_at",
     )
+    list_per_page = 30
