@@ -19,3 +19,4 @@ class OperationAdmin(admin.ModelAdmin):
         "created_at",
     )
     list_per_page = 30
+    raw_id_fields = ("news_id",)

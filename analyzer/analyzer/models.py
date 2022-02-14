@@ -26,19 +26,19 @@ class News(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'news'
+        db_table = "news"
 
     def __str__(self):
-        return '{}. {}'.format(self.id, self.title)
+        return f"{self.pk} - {self.title}"
 
 
 class Operation(BaseModel):
     news_id = models.OneToOneField(
-        'News',
-        related_name='operations',
-        related_query_name='operation',
+        "News",
+        related_name="operations",
+        related_query_name="operation",
         on_delete=models.CASCADE,
-        db_column='news_id',
+        db_column="news_id",
     )
     keyword = models.BooleanField(default=False)
     ner = models.BooleanField(default=False)
@@ -50,7 +50,7 @@ class Operation(BaseModel):
     summary = models.BooleanField(default=False)
 
     def __str__(self):
-        return '{}'.format(self.id)
+        return "{}".format(self.id)
 
 
 class Option(models.Model):
@@ -61,19 +61,19 @@ class Option(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'options'
+        db_table = "options"
 
     def __str__(self):
-        return '{}'.format(self.key)
+        return "{}".format(self.key)
 
 
 class Keyword(models.Model):
     news_id = models.OneToOneField(
-        'News',
-        related_name='keywords',
-        related_query_name='keyword',
+        "News",
+        related_name="keywords",
+        related_query_name="keyword",
         on_delete=models.CASCADE,
-        db_column='news_id',
+        db_column="news_id",
     )
     keyword = models.CharField(max_length=70)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -82,19 +82,19 @@ class Keyword(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'news_keyword'
+        db_table = "news_keyword"
 
     def __str__(self):
-        return '{}'.format(self.id)
+        return "{}".format(self.id)
 
 
 class Ner(models.Model):
     news_id = models.OneToOneField(
-        'News',
-        related_name='ners',
-        related_query_name='ner',
+        "News",
+        related_name="ners",
+        related_query_name="ner",
         on_delete=models.CASCADE,
-        db_column='news_id',
+        db_column="news_id",
     )
     entity = models.CharField(max_length=70)
     type = models.CharField(max_length=70)
@@ -103,26 +103,26 @@ class Ner(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'news_ner'
+        db_table = "news_ner"
 
     def __str__(self):
-        return '{}'.format(self.id)
+        return "{}".format(self.id)
 
 
 class Geo(models.Model):
     news_id = models.OneToOneField(
-        'News',
-        related_name='geos',
-        related_query_name='geo',
+        "News",
+        related_name="geos",
+        related_query_name="geo",
         on_delete=models.CASCADE,
-        db_column='news_id',
+        db_column="news_id",
     )
     ner_id = models.OneToOneField(
-        'Ner',
-        related_name='geos',
-        related_query_name='geo',
+        "Ner",
+        related_name="geos",
+        related_query_name="geo",
         on_delete=models.CASCADE,
-        db_column='ner_id',
+        db_column="ner_id",
     )
     location = models.CharField(max_length=70)
     country = models.CharField(max_length=70)
@@ -132,19 +132,19 @@ class Geo(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'ner_country'
+        db_table = "ner_country"
 
     def __str__(self):
-        return '{}'.format(self.id)
+        return "{}".format(self.id)
 
 
 class Sentiment(models.Model):
     news_id = models.OneToOneField(
-        'News',
-        related_name='sentiments',
-        related_query_name='sentiment',
+        "News",
+        related_name="sentiments",
+        related_query_name="sentiment",
         on_delete=models.CASCADE,
-        db_column='news_id',
+        db_column="news_id",
     )
     neg = models.FloatField(default=0.0)
     pos = models.FloatField(default=0.0)
@@ -155,19 +155,19 @@ class Sentiment(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'news_sentiment'
+        db_table = "news_sentiment"
 
     def __str__(self):
-        return '{}'.format(self.id)
+        return "{}".format(self.id)
 
 
 class Doc2vec(models.Model):
     news_id = models.OneToOneField(
-        'News',
-        related_name='doc2vecs',
-        related_query_name='doc2vec',
+        "News",
+        related_name="doc2vecs",
+        related_query_name="doc2vec",
         on_delete=models.CASCADE,
-        db_column='news_id',
+        db_column="news_id",
     )
     vector = JSONField()
     vector_norm = models.FloatField(default=0.0)
@@ -176,19 +176,19 @@ class Doc2vec(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'news_vector'
+        db_table = "news_vector"
 
     def __str__(self):
-        return '{}'.format(self.id)
+        return "{}".format(self.id)
 
 
 class Related(models.Model):
     news_id = models.OneToOneField(
-        'News',
-        related_name='relateds',
-        related_query_name='related',
+        "News",
+        related_name="relateds",
+        related_query_name="related",
         on_delete=models.CASCADE,
-        db_column='news_id',
+        db_column="news_id",
     )
     related_news_id = models.BigIntegerField()
     score = models.FloatField(default=0.0)
@@ -197,10 +197,10 @@ class Related(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'news_related'
+        db_table = "news_related"
 
     def __str__(self):
-        return '{}'.format(self.id)
+        return "{}".format(self.id)
 
 
 class ArmyCategory(models.Model):
@@ -210,7 +210,7 @@ class ArmyCategory(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'army_category'
+        db_table = "army_category"
 
 
 class ArmyKeyword(models.Model):
@@ -220,44 +220,44 @@ class ArmyKeyword(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'army_keyword'
+        db_table = "army_keyword"
 
 
 class CategoryKeyword(models.Model):
     army_category_id = models.OneToOneField(
-        'ArmyCategory',
-        related_name='categorykeywords',
-        related_query_name='categorykeyword',
+        "ArmyCategory",
+        related_name="categorykeywords",
+        related_query_name="categorykeyword",
         on_delete=models.CASCADE,
-        db_column='army_category_id',
+        db_column="army_category_id",
     )
     army_keyword_id = models.OneToOneField(
-        'ArmyKeyword',
-        related_name='keywords',
-        related_query_name='keyword',
+        "ArmyKeyword",
+        related_name="keywords",
+        related_query_name="keyword",
         on_delete=models.CASCADE,
-        db_column='army_keyword_id',
+        db_column="army_keyword_id",
     )
 
     class Meta:
         managed = False
-        db_table = 'category_keyword'
+        db_table = "category_keyword"
 
 
 class NewsCategory(models.Model):
     news_id = models.OneToOneField(
-        'News',
-        related_name='news',
-        related_query_name='news',
+        "News",
+        related_name="news",
+        related_query_name="news",
         on_delete=models.CASCADE,
-        db_column='news_id',
+        db_column="news_id",
     )
     army_category_id = models.OneToOneField(
-        'ArmyCategory',
-        related_name='newscategories',
-        related_query_name='newscategory',
+        "ArmyCategory",
+        related_name="newscategories",
+        related_query_name="newscategory",
         on_delete=models.CASCADE,
-        db_column='army_category_id',
+        db_column="army_category_id",
     )
     score = models.FloatField(null=True, blank=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -265,4 +265,4 @@ class NewsCategory(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'news_category'
+        db_table = "news_category"
