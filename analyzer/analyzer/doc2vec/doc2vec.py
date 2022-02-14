@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
 # Strategy 1
-import spacy
 import json
 
 

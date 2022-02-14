@@ -11,7 +11,7 @@ def relatedNews(news_id, limit, days):
     # Retrieve news vector
     news_vect = Doc2vec.objects.filter(news_id=news_id).first().vector
     # convert from string to array
-    news_vect = news_vect.strip('][').split(', ')
+    news_vect = news_vect.strip("][").split(", ")
 
     today = datetime.date.today()
     first = today.replace(day=1)
@@ -23,7 +23,7 @@ def relatedNews(news_id, limit, days):
     for news in candids:
         # convert from string to array
         news_id = news.news_id.id
-        news = news.vector.strip('][').split(', ')
+        news = news.vector.strip("][").split(", ")
         score = cosine_similarity([news], [news_vect])[0][0]
         temp.append((news_id, score))
 

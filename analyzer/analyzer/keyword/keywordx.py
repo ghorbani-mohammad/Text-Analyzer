@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from analyzer.apps import AnalyzerConfig
+
 
 class Keyword(ABC):
     def analyze(self, body_text):
@@ -22,9 +24,9 @@ class KeywordStrategyB(Keyword):
     from string import punctuation
 
     def analyze(self, body_text, limit):
-        nlp = spacy.load("en_core_web_sm")
+        nlp = AnalyzerConfig.spacy_model
         result = []
-        pos_tag = ['PROPN', 'NOUN']
+        pos_tag = ["PROPN", "NOUN"]
         doc = nlp(body_text.lower())
         for token in doc:
             if token.text in nlp.Defaults.stop_words or token.text in punctuation:

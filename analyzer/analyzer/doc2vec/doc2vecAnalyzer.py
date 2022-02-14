@@ -8,5 +8,4 @@ def analyzeDoc2vec(news_id, text, now, config, model):
     else:
         doc2vec_analyzer = doc2vecAnalyzer(doc2vecStrategyA())
         vector, vector_norm = doc2vec_analyzer.analyze(text)
-
     return vector, vector_norm
