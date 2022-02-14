@@ -108,7 +108,6 @@ def news_to_elastic(delete=False, id=None):
     step = 0
     total = queryset.count()
     while True:
-        print(step * batch_size, min((step + 1) * batch_size, total))
         data = queryset[step * batch_size : min((step + 1) * batch_size, total)]
         data = data.values(*values)
         for item in data:
