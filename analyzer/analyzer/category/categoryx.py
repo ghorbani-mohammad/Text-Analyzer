@@ -22,10 +22,8 @@ def category(spacy_model, np, punctuation, news_id, categories):
                         sim = word.similarity(token)
                         if sim > 0.59:
                             temp_score.append(sim)
-                    else:
-                        pass
         if temp_score:
-            similarity[cat_id] = (np.mean(temp_score) * len(temp_score)) / len(keywords)
+            similarity[cat_id] = np.sum(temp_score) / len(keywords)
             total += similarity[cat_id]
             temp_score = []
         else:
@@ -36,5 +34,4 @@ def category(spacy_model, np, punctuation, news_id, categories):
             similarity[key] = round(similarity[key] * 100)
         else:
             similarity[key] = round(similarity[key] / total * 100)
-
     return similarity
