@@ -29,9 +29,9 @@ logger = logging.getLogger(__name__)
 MINUTE = 60
 
 
-@app.task()
+@app.task(name="news_mongo_to_postgres")
 @only_one_concurrency(key="SingleTask", timeout=10 * MINUTE)
-def news_importer():
+def news_mongo_to_postgres():
     myclient = pymongo.MongoClient(f"mongodb://mongodb:{settings.MONGO_DB_PORT}/")
     news_raw = myclient["news_raw"]["news_raw"]
     last_imported_news_id = models.Option.objects.get(key="last_imported_news").value
@@ -79,7 +79,7 @@ def news_importer():
     myclient.close()
 
 
-@app.task()
+@app.task(name="news_to_elastic")
 def news_to_elastic(delete=False, id=None):
     address = f"http://elasticsearch:{settings.ELASTIC_DB_PORT}"
     es = Elasticsearch([address])
@@ -110,7 +110,7 @@ def remove_htmls_tags_filter(text):
     return re.sub(re.compile("<.*?>"), "\n", text)
 
 
-@app.task()
+@app.task(name="news_keyword_extraction")
 def news_keyword_extraction():
     keyword_extraction_limit = int(
         models.Option.objects.get(key="number_of_keywords").value
