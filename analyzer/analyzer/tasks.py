@@ -290,7 +290,6 @@ def news_doc2vec():
     spacy_model = AnalyzerConfig.spacy_model
     doc2vec_analyzer_algorithm = Option.objects.get(key="doc2vec_analyzer").value
     news = Operation.objects.filter(doc2vec=False).order_by("-id")
-    print(news.count())
     for item in news[: min(50, news.count())]:
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         with transaction.atomic():

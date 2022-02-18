@@ -50,7 +50,7 @@ class Operation(BaseModel):
     summary = models.BooleanField(default=False)
 
     def __str__(self):
-        return "{}".format(self.id)
+        return f"{self.pk}"
 
 
 class Option(models.Model):
@@ -64,7 +64,7 @@ class Option(models.Model):
         db_table = "options"
 
     def __str__(self):
-        return "{}".format(self.key)
+        return f"{self.key}"
 
 
 class Keyword(models.Model):
@@ -85,7 +85,7 @@ class Keyword(models.Model):
         db_table = "news_keyword"
 
     def __str__(self):
-        return "{}".format(self.id)
+        return f"{self.pk}"
 
 
 class Ner(models.Model):
@@ -106,7 +106,7 @@ class Ner(models.Model):
         db_table = "news_ner"
 
     def __str__(self):
-        return "{}".format(self.id)
+        return f"{self.pk}"
 
 
 class Geo(models.Model):
@@ -135,7 +135,7 @@ class Geo(models.Model):
         db_table = "ner_country"
 
     def __str__(self):
-        return "{}".format(self.id)
+        return f"{self.pk}"
 
 
 class Sentiment(models.Model):
@@ -158,7 +158,7 @@ class Sentiment(models.Model):
         db_table = "news_sentiment"
 
     def __str__(self):
-        return "{}".format(self.id)
+        return f"{self.pk}"
 
 
 class Doc2vec(models.Model):
@@ -179,7 +179,7 @@ class Doc2vec(models.Model):
         db_table = "news_vector"
 
     def __str__(self):
-        return "{}".format(self.id)
+        return f"{self.pk}"
 
 
 class Related(models.Model):
@@ -200,7 +200,7 @@ class Related(models.Model):
         db_table = "news_related"
 
     def __str__(self):
-        return "{}".format(self.id)
+        return f"{self.pk}"
 
 
 class ArmyCategory(models.Model):
