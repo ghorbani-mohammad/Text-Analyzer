@@ -3,15 +3,9 @@ import environ
 
 env = environ.Env()
 
-DEBUG = True
 ALLOWED_HOSTS = ["*"]
-SECRET_KEY = "n6ld+$-+#x(j7!vys)uvbscvsmm51nwn+(z#3zeqjx+a-!vt_@"
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-SERVER_IP = env.str("SERVER_IP")
-DB_PORT = env.str("DB_PORT")
-DB_USER = env.str("DB_USER")
-DB_PASS = env.str("DB_PASS")
+DEBUG = env.bool("DEBUG")
+SECRET_KEY = env.str("SECRET_KEY")
 ELASTIC_DB_PORT = "9200"
 MONGO_DB_PORT = "27017"
 ELASTICSEARCH_DSL = {
@@ -21,13 +15,14 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "OPTIONS": {"options": "-c search_path=army"},
-        "NAME": "postgres",
-        "USER": DB_USER,
-        "PASSWORD": DB_PASS,
         "HOST": "postgres",
-        "PORT": DB_PORT,
+        "NAME": "postgres",
+        "USER": env.str("DB_USER"),
+        "PASSWORD": env.str("DB_PASS"),
+        "PORT": env.str("DB_PORT"),
     },
 }
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Application definition
