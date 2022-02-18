@@ -21,7 +21,7 @@ MINUTE = 60
 app.conf.beat_schedule = {
     "news_mongo_to_postgres": {
         "task": "news_mongo_to_postgres",
-        "schedule": 1 * MINUTE,
+        "schedule": 5 * MINUTE,
     },
     "news_keyword_extraction": {
         "task": "news_keyword_extraction",
