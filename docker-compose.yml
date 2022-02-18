@@ -31,7 +31,7 @@ services:
     volumes:
       - .:/app
     working_dir: /app/analyzer
-    command: ["celery", "-A", "analyzer_app", "worker", "-l", "info", "--pidfile=", "--concurrency=2"]
+    command: ["celery", "-A", "analyzer_app", "worker", "-l", "info", "--pidfile=", "--concurrency=1"]
     restart: unless-stopped
   
   analyzer_beat:
