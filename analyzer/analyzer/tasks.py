@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 import time
-
 import numpy as np
 import pymongo, re
 import logging, datetime
@@ -12,8 +11,9 @@ from elasticsearch import Elasticsearch
 
 from django.conf import settings
 from django.db import transaction
-from .apps import AnalyzerConfig
+
 from . import models
+from .apps import AnalyzerConfig
 from analyzer_app.celery import app
 from analyzer.ner import ner
 from analyzer.related import related
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 MINUTE = 60
 
 
-@app.task(name="news_mongo_to_postgres")
+@app.task()
 @only_one_concurrency(key="SingleTask", timeout=10 * MINUTE)
 def news_importer():
     myclient = pymongo.MongoClient(f"mongodb://mongodb:{settings.MONGO_DB_PORT}/")
@@ -79,7 +79,7 @@ def news_importer():
     myclient.close()
 
 
-@app.task(name="news_to_elastic")
+@app.task()
 def news_to_elastic(delete=False, id=None):
     address = f"http://elasticsearch:{settings.ELASTIC_DB_PORT}"
     es = Elasticsearch([address])
@@ -110,7 +110,7 @@ def remove_htmls_tags_filter(text):
     return re.sub(re.compile("<.*?>"), "\n", text)
 
 
-@app.task(name="news_keyword_extraction")
+@app.task()
 def news_keyword_extraction():
     keyword_extraction_limit = int(
         models.Option.objects.get(key="number_of_keywords").value
