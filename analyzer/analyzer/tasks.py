@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 import time
+import redis
 import numpy as np
 import pymongo, re
 import logging, datetime
@@ -39,7 +40,34 @@ from analyzer.summary import summaryx
 logger = logging.getLogger(__name__)
 
 
+REDIS_CLIENT = redis.Redis()
+
+
+def only_one(function=None, key="", timeout=None):
+    """Enforce only one celery task at a time."""
+
+    def _dec(run_func):
+        """Decorator."""
+
+        def _caller(*args, **kwargs):
+            """Caller."""
+            have_lock = False
+            lock = REDIS_CLIENT.lock(key, timeout=timeout)
+            try:
+                have_lock = lock.acquire(blocking=False)
+                if have_lock:
+                    run_func(*args, **kwargs)
+            finally:
+                if have_lock:
+                    lock.release()
+
+        return _caller
+
+    return _dec(function) if function is not None else _dec
+
+
 @app.task(name="news_mongo_to_postgres")
+@only_one(key="SingleTask", timeout=60 * 5)
 def news_importer():
     myclient = pymongo.MongoClient(f"mongodb://mongodb:{settings.MONGO_DB_PORT}/")
     news_raw = myclient["news_raw"]["news_raw"]
@@ -139,7 +167,6 @@ def news_keyword_extraction():
             keywords = keywordAnalyzer.analyzeKeyword(
                 item.news_id.id, body, keyword_extraction_limit, keyword_extraction_algo
             )
-
             obj = []
             now = time.strftime("%Y-%m-%d %H:%M:%S")
             for keyword in keywords:
