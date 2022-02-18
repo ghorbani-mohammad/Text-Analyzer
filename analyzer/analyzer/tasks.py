@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 import time
-import redis
+
 import numpy as np
 import pymongo, re
 import logging, datetime
@@ -11,67 +11,31 @@ from geopy.geocoders import Nominatim
 from elasticsearch import Elasticsearch
 
 from django.conf import settings
-from .apps import AnalyzerConfig
 from django.db import transaction
+from .apps import AnalyzerConfig
+from . import models
 from analyzer_app.celery import app
-from analyzer.models import (
-    News,
-    Option,
-    Operation,
-    Keyword,
-    Ner,
-    Geo,
-    Sentiment,
-    Doc2vec,
-    Related,
-    NewsCategory,
-    CategoryKeyword,
-    ArmyCategory,
-)
-from analyzer.keyword import keywordAnalyzer
 from analyzer.ner import ner
-from analyzer.sentiment import sentimentAnalyzer
-from analyzer.doc2vec import doc2vecAnalyzer
 from analyzer.related import related
-from analyzer.category import categoryx
 from analyzer.summary import summaryx
+from analyzer.category import categoryx
+from analyzer.doc2vec import doc2vecAnalyzer
+from analyzer.keyword import keywordAnalyzer
+from analyzer.sentiment import sentimentAnalyzer
+from .utils import only_one_concurrency
 
 
 logger = logging.getLogger(__name__)
-
-
-REDIS_CLIENT = redis.Redis(host="analyzer_redis", port=6379, db=5)
-
-
-def only_one(function=None, key="", timeout=None):
-    def _dec(run_func):
-        def _caller(*args, **kwargs):
-            have_lock = False
-            lock = REDIS_CLIENT.lock(key, timeout=timeout)
-            try:
-                have_lock = lock.acquire(blocking=False)
-                print(f"***** {have_lock}")
-                if have_lock:
-                    run_func(*args, **kwargs)
-            finally:
-                if have_lock:
-                    lock.release()
-
-        return _caller
-
-    return _dec(function) if function is not None else _dec
+MINUTE = 60
 
 
 @app.task(name="news_mongo_to_postgres")
-@only_one(key="SingleTask", timeout=60 * 5)
+@only_one_concurrency(key="SingleTask", timeout=10 * MINUTE)
 def news_importer():
-    print("news_importer started ****")
-    time.sleep(20)
     myclient = pymongo.MongoClient(f"mongodb://mongodb:{settings.MONGO_DB_PORT}/")
     news_raw = myclient["news_raw"]["news_raw"]
-    last_imported_news_id = Option.objects.get(key="last_imported_news").value
-    # print(f"last imported news mongo_id was {last_imported_news_id}")
-
+    last_imported_news_id = models.Option.objects.get(key="last_imported_news").value
+    print(f"last imported news mongo_id was {last_imported_news_id}")
     _filter = {"_id": {"$gt": ObjectId(last_imported_news_id)}, "body": {"$ne": ""}}
     projection = {
         "title": 1,
@@ -84,22 +48,19 @@ def news_importer():
         "link": 1,
         "agency_id": 1,
     }
-
     last_docs_count = news_raw.count_documents(_filter)
-    # print(f"{last_docs_count} number of documents are queued to insert to postgres")
-
+    print(f"{last_docs_count} number of documents are queued to insert to postgres")
     # Getting news that must be imported to postgres from mongo
     last_docs = news_raw.find(
         _filter, projection, no_cursor_timeout=True, sort=[("_id", pymongo.ASCENDING)]
     )
-
     for doc in last_docs[:10]:
-        if News.objects.filter(_id=doc["_id"]).count():
+        if models.News.objects.filter(_id=doc["_id"]).count():
             continue
         print(f"to-> postgres.title is {doc['title']} and source is {doc['source']}")
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         with transaction.atomic():
-            inserted_news = News.objects.create(
+            inserted_news = models.News.objects.create(
                 _id=str(doc["_id"]),
                 title=doc["title"].strip(),
                 body=doc["body"].strip(),
@@ -110,10 +71,10 @@ def news_importer():
                 created_at=now,
                 agency_id=doc["agency_id"],
             )
-            Option.objects.filter(key="last_imported_news").update(
+            models.Option.objects.filter(key="last_imported_news").update(
                 value=str(doc["_id"])
             )
-            Operation.objects.create(news_id=inserted_news)
+            models.Operation.objects.create(news_id=inserted_news)
             news_to_elastic.delay(delete=False, id=inserted_news.id)
     myclient.close()
 
@@ -127,9 +88,9 @@ def news_to_elastic(delete=False, id=None):
         es.indices.delete(index=index_name)
     values = ("id", "title", "body", "agency_id", "source", "date", "_id")
     if id:
-        queryset = News.objects.filter(id=id)
+        queryset = models.News.objects.filter(id=id)
     else:
-        queryset = News.objects.order_by("-pk")
+        queryset = models.News.objects.order_by("-pk")
     batch_size = 10000
     step = 0
     total = queryset.count()
@@ -151,16 +112,18 @@ def remove_htmls_tags_filter(text):
 
 @app.task(name="news_keyword_extraction")
 def news_keyword_extraction():
-    keyword_extraction_limit = int(Option.objects.get(key="number_of_keywords").value)
-    keyword_extraction_algo = Option.objects.get(
+    keyword_extraction_limit = int(
+        models.Option.objects.get(key="number_of_keywords").value
+    )
+    keyword_extraction_algo = models.Option.objects.get(
         key="keyword_extraction_algorithm"
     ).value
 
-    news = Operation.objects.filter(keyword=False).order_by("-id")
+    news = models.Operation.objects.filter(keyword=False).order_by("-id")
     for item in news[:50]:
         with transaction.atomic():
-            Keyword.objects.filter(news_id=item.news_id.id).delete()
-            body = News.objects.get(id=item.news_id.id).body
+            models.Keyword.objects.filter(news_id=item.news_id.id).delete()
+            body = models.News.objects.get(id=item.news_id.id).body
             body = remove_htmls_tags_filter(body)
             keywords = keywordAnalyzer.analyzeKeyword(
                 item.news_id.id, body, keyword_extraction_limit, keyword_extraction_algo
@@ -169,28 +132,30 @@ def news_keyword_extraction():
             now = time.strftime("%Y-%m-%d %H:%M:%S")
             for keyword in keywords:
                 obj.append(
-                    Keyword(
+                    models.Keyword(
                         news_id=item.news_id,
                         keyword=keyword,
                         created_at=now,
                         news_date=item.news_id.date,
                     )
                 )
-            Keyword.objects.bulk_create(obj)
-            Operation.objects.filter(news_id=item.news_id).update(keyword=True)
+            models.Keyword.objects.bulk_create(obj)
+            models.Operation.objects.filter(news_id=item.news_id).update(keyword=True)
 
 
 @app.task(name="news_ner_extraction")
 def news_ner_extraction():
-    news = Operation.objects.filter(ner=False).order_by("-id")
+    news = models.Operation.objects.filter(ner=False).order_by("-id")
     ner_extraction_types = (
-        Option.objects.get(key="ner_extraction_types").value.replace(" ", "").split(",")
+        models.Option.objects.get(key="ner_extraction_types")
+        .value.replace(" ", "")
+        .split(",")
     )
     for item in news[:50]:
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         with transaction.atomic():
-            Ner.objects.filter(news_id=item.news_id.id).delete()
-            news = News.objects.get(id=item.news_id.id)
+            models.Ner.objects.filter(news_id=item.news_id.id).delete()
+            news = models.News.objects.get(id=item.news_id.id)
             x = ner.NameEntityRecognition(
                 item.news_id.id,
                 remove_htmls_tags_filter(news.body),
@@ -202,36 +167,36 @@ def news_ner_extraction():
             for entity in results.keys():
                 for value in results.get(entity):
                     obj.append(
-                        Ner(
+                        models.Ner(
                             news_id=item.news_id,
                             type=entity,
                             entity=value,
                             created_at=now,
                         )
                     )
-            Ner.objects.bulk_create(obj)
-            Operation.objects.filter(news_id=item.news_id).update(ner=True)
+            models.Ner.objects.bulk_create(obj)
+            models.Operation.objects.filter(news_id=item.news_id).update(ner=True)
 
 
 @app.task(name="news_geo_extraction")
 def news_geo_extraction():
-    use_google_geo = Option.objects.get(key="use_google_geo").value
-    news = Operation.objects.filter(geo=False).order_by("-id")
+    use_google_geo = models.Option.objects.get(key="use_google_geo").value
+    news = models.Operation.objects.filter(geo=False).order_by("-id")
     for item in news[:50]:
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         with transaction.atomic():
-            Geo.objects.filter(news_id=item.news_id.id).delete()
-            gpes = Ner.objects.filter(type="GPE", news_id=item.news_id.id)
+            models.Geo.objects.filter(news_id=item.news_id.id).delete()
+            gpes = models.Ner.objects.filter(type="GPE", news_id=item.news_id.id)
             obj = []
             for gpe in gpes:
                 geo = (
-                    Geo.objects.filter(location=gpe.entity)
+                    models.Geo.objects.filter(location=gpe.entity)
                     .exclude(country=None)
                     .first()
                 )
                 if geo:
                     obj.append(
-                        Geo(
+                        models.Geo(
                             news_id=item.news_id,
                             ner_id=gpe,
                             location=gpe.entity,
@@ -243,13 +208,13 @@ def news_geo_extraction():
                 else:
                     if use_google_geo == "True":
                         proper_gpe.delay(gpe.id, 0)
-            Geo.objects.bulk_create(obj)
-            Operation.objects.filter(news_id=item.news_id).update(geo=True)
+            models.Geo.objects.bulk_create(obj)
+            models.Operation.objects.filter(news_id=item.news_id).update(geo=True)
 
 
 @app.task(name="gpe_to_geo")
 def proper_gpe(gpe_id, number_of_try):
-    gpe = Ner.objects.filter(id=gpe_id).first()
+    gpe = models.Ner.objects.filter(id=gpe_id).first()
     location = gpe.entity
     number_of_try += 1
     if number_of_try == 3:
@@ -271,7 +236,7 @@ def proper_gpe(gpe_id, number_of_try):
                 result = "United States"
             now = time.strftime("%Y-%m-%d %H:%M:%S")
             with transaction.atomic():
-                Geo.objects.create(
+                models.Geo.objects.create(
                     news_id=gpe.news_id,
                     ner_id=gpe,
                     location=gpe.entity,
@@ -279,7 +244,7 @@ def proper_gpe(gpe_id, number_of_try):
                     created_at=now,
                     news_date=gpe.news_id.date,
                 )
-                Operation.objects.filter(news_id=gpe.news_id).update(geo=True)
+                models.Operation.objects.filter(news_id=gpe.news_id).update(geo=True)
             return 0
     except Exception as e:
         proper_gpe(gpe.id, number_of_try)
@@ -287,19 +252,21 @@ def proper_gpe(gpe_id, number_of_try):
 
 @app.task(name="news_sentiment")
 def news_sentiment():
-    sentiment_analyzer_algorithm = Option.objects.get(key="sentiment_analyzer").value
-    news = Operation.objects.filter(sentiment=False).order_by("-id")
+    sentiment_analyzer_algorithm = models.Option.objects.get(
+        key="sentiment_analyzer"
+    ).value
+    news = models.Operation.objects.filter(sentiment=False).order_by("-id")
     for item in news[:50]:
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         with transaction.atomic():
-            Sentiment.objects.filter(news_id=item.news_id.id).delete()
+            models.Sentiment.objects.filter(news_id=item.news_id.id).delete()
             result = sentimentAnalyzer.analyzeSentiment(
                 item.news_id.id,
                 remove_htmls_tags_filter(item.news_id.body),
                 now,
                 sentiment_analyzer_algorithm,
             )
-            Sentiment.objects.create(
+            models.Sentiment.objects.create(
                 news_id=item.news_id,
                 neg=round(result["neg"], 2),
                 pos=round(result["pos"], 2),
@@ -307,18 +274,18 @@ def news_sentiment():
                 compound=round(result["compound"], 2),
                 created_at=now,
             )
-            Operation.objects.filter(news_id=item.news_id).update(sentiment=True)
+            models.Operation.objects.filter(news_id=item.news_id).update(sentiment=True)
 
 
 @app.task(name="news_doc2vec")
 def news_doc2vec():
     spacy_model = AnalyzerConfig.spacy_model
-    doc2vec_analyzer_algorithm = Option.objects.get(key="doc2vec_analyzer").value
-    news = Operation.objects.filter(doc2vec=False).order_by("-id")
+    doc2vec_analyzer_algorithm = models.Option.objects.get(key="doc2vec_analyzer").value
+    news = models.Operation.objects.filter(doc2vec=False).order_by("-id")
     for item in news[: min(50, news.count())]:
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         with transaction.atomic():
-            Doc2vec.objects.filter(news_id=item.news_id.id).delete()
+            models.Doc2vec.objects.filter(news_id=item.news_id.id).delete()
             vector, vector_norm = doc2vecAnalyzer.analyzeDoc2vec(
                 item.news_id.id,
                 remove_htmls_tags_filter(item.news_id.body),
@@ -326,27 +293,29 @@ def news_doc2vec():
                 doc2vec_analyzer_algorithm,
                 spacy_model,
             )
-            Doc2vec.objects.create(
+            models.Doc2vec.objects.create(
                 news_id=item.news_id,
                 vector=vector,
                 vector_norm=vector_norm,
                 created_at=now,
             )
-            Operation.objects.filter(news_id=item.news_id).update(doc2vec=True)
+            models.Operation.objects.filter(news_id=item.news_id).update(doc2vec=True)
 
 
 @app.task(name="news_related")
 def news_related():
     related_extraction_limit = int(
-        Option.objects.get(key="number_of_related_news").value
+        models.Option.objects.get(key="number_of_related_news").value
     )
     related_extraction_days = int(
-        Option.objects.get(key="past_days_related_news").value
+        models.Option.objects.get(key="past_days_related_news").value
     )
-    news = Operation.objects.filter(related_news=False, doc2vec=True).order_by("-id")
+    news = models.Operation.objects.filter(related_news=False, doc2vec=True).order_by(
+        "-id"
+    )
     for item in news[:20]:
         with transaction.atomic():
-            Related.objects.filter(news_id=item.news_id.id).delete()
+            models.Related.objects.filter(news_id=item.news_id.id).delete()
             results = related.relatedNews(
                 item.news_id.id, related_extraction_limit, related_extraction_days
             )
@@ -354,22 +323,24 @@ def news_related():
             now = time.strftime("%Y-%m-%d %H:%M:%S")
             for x in results:
                 obj.append(
-                    Related(
+                    models.Related(
                         news_id=item.news_id,
                         related_news_id=x["related_news_id"],
                         score=x["score"],
                         created_at=now,
                     )
                 )
-            Related.objects.bulk_create(obj)
-            Operation.objects.filter(news_id=item.news_id).update(related_news=True)
+            models.Related.objects.bulk_create(obj)
+            models.Operation.objects.filter(news_id=item.news_id).update(
+                related_news=True
+            )
 
 
 @app.task(name="news_category")
 def news_category():
     spacy_model = AnalyzerConfig.spacy_model
-    news = Operation.objects.filter(category=False).order_by("-id")
-    categories = CategoryKeyword.objects.all()
+    news = models.Operation.objects.filter(category=False).order_by("-id")
+    categories = models.CategoryKeyword.objects.all()
     for item in news[:20]:
         results = categoryx.category(
             spacy_model, np, punctuation, item.news_id, categories
@@ -378,17 +349,17 @@ def news_category():
         now = time.strftime("%Y-%m-%d %H:%M:%S")
         for x in results:
             obj.append(
-                NewsCategory(
+                models.NewsCategory(
                     news_id=item.news_id,
-                    army_category_id=ArmyCategory.objects.get(id=x),
                     score=results[x],
+                    army_category_id=models.ArmyCategory.objects.get(id=x),
                     created_at=now,
                 )
             )
         with transaction.atomic():
-            NewsCategory.objects.filter(news_id=item.news_id.id).delete()
-            NewsCategory.objects.bulk_create(obj)
-            Operation.objects.filter(news_id=item.news_id).update(category=True)
+            models.NewsCategory.objects.filter(news_id=item.news_id.id).delete()
+            models.NewsCategory.objects.bulk_create(obj)
+            models.Operation.objects.filter(news_id=item.news_id).update(category=True)
 
 
 @app.task(name="news_summary")
@@ -399,10 +370,10 @@ def news_summary():
     from sumy.summarizers.lsa import LsaSummarizer as Summarizer
     from sumy.utils import get_stop_words
 
-    news = Operation.objects.filter(summary=False).order_by("-id")
+    news = models.Operation.objects.filter(summary=False).order_by("-id")
     for item in news[:50]:
         if item.news_id.body is None or item.news_id.body == "":
-            Operation.objects.filter(news_id=item.news_id).update(summary=True)
+            models.Operation.objects.filter(news_id=item.news_id).update(summary=True)
             continue
         result = summaryx.extractSummary(
             PlaintextParser,
@@ -418,4 +389,4 @@ def news_summary():
                 item.news_id.summary = result[0]
                 item.news_id.updated_at = now
                 item.news_id.save()
-            Operation.objects.filter(news_id=item.news_id).update(summary=True)
+            models.Operation.objects.filter(news_id=item.news_id).update(summary=True)
