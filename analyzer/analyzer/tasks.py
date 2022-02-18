@@ -40,7 +40,7 @@ from analyzer.summary import summaryx
 logger = logging.getLogger(__name__)
 
 
-REDIS_CLIENT = redis.Redis()
+REDIS_CLIENT = redis.Redis(host="analyzer_redis", port=6379, db=5)
 
 
 def only_one(function=None, key="", timeout=None):
