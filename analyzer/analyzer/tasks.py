@@ -50,6 +50,7 @@ def only_one(function=None, key="", timeout=None):
             lock = REDIS_CLIENT.lock(key, timeout=timeout)
             try:
                 have_lock = lock.acquire(blocking=False)
+                print(f"***** {have_lock}")
                 if have_lock:
                     run_func(*args, **kwargs)
             finally:
@@ -64,6 +65,7 @@ def only_one(function=None, key="", timeout=None):
 @app.task(name="news_mongo_to_postgres")
 @only_one(key="SingleTask", timeout=60 * 5)
 def news_importer():
+    print("news_importer started ****")
     time.sleep(20)
     myclient = pymongo.MongoClient(f"mongodb://mongodb:{settings.MONGO_DB_PORT}/")
     news_raw = myclient["news_raw"]["news_raw"]
