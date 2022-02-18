@@ -44,13 +44,8 @@ REDIS_CLIENT = redis.Redis(host="analyzer_redis", port=6379, db=5)
 
 
 def only_one(function=None, key="", timeout=None):
-    """Enforce only one celery task at a time."""
-
     def _dec(run_func):
-        """Decorator."""
-
         def _caller(*args, **kwargs):
-            """Caller."""
             have_lock = False
             lock = REDIS_CLIENT.lock(key, timeout=timeout)
             try:
@@ -69,6 +64,7 @@ def only_one(function=None, key="", timeout=None):
 @app.task(name="news_mongo_to_postgres")
 @only_one(key="SingleTask", timeout=60 * 5)
 def news_importer():
+    time.sleep(20)
     myclient = pymongo.MongoClient(f"mongodb://mongodb:{settings.MONGO_DB_PORT}/")
     news_raw = myclient["news_raw"]["news_raw"]
     last_imported_news_id = Option.objects.get(key="last_imported_news").value
