@@ -27,10 +27,11 @@ from .utils import only_one_concurrency
 
 logger = logging.getLogger(__name__)
 MINUTE = 60
+TASKS_TIMEOUT = 10 * MINUTE
 
 
 @app.task(name="news_mongo_to_postgres")
-@only_one_concurrency(key="SingleTask", timeout=10 * MINUTE)
+@only_one_concurrency(key="news_mongo_to_postgres", timeout=TASKS_TIMEOUT)
 def news_mongo_to_postgres():
     myclient = pymongo.MongoClient(f"mongodb://mongodb:{settings.MONGO_DB_PORT}/")
     news_raw = myclient["news_raw"]["news_raw"]
@@ -80,6 +81,7 @@ def news_mongo_to_postgres():
 
 
 @app.task(name="news_to_elastic")
+@only_one_concurrency(key="news_to_elastic", timeout=TASKS_TIMEOUT)
 def news_to_elastic(delete=False, id=None):
     address = f"http://elasticsearch:{settings.ELASTIC_DB_PORT}"
     es = Elasticsearch([address])
@@ -111,6 +113,7 @@ def remove_htmls_tags_filter(text):
 
 
 @app.task(name="news_keyword_extraction")
+@only_one_concurrency(key="news_keyword_extraction", timeout=TASKS_TIMEOUT)
 def news_keyword_extraction():
     keyword_extraction_limit = int(
         models.Option.objects.get(key="number_of_keywords").value
@@ -144,6 +147,7 @@ def news_keyword_extraction():
 
 
 @app.task(name="news_ner_extraction")
+@only_one_concurrency(key="news_ner_extraction", timeout=TASKS_TIMEOUT)
 def news_ner_extraction():
     news = models.Operation.objects.filter(ner=False).order_by("-id")
     ner_extraction_types = (
@@ -179,6 +183,7 @@ def news_ner_extraction():
 
 
 @app.task(name="news_geo_extraction")
+@only_one_concurrency(key="news_geo_extraction", timeout=TASKS_TIMEOUT)
 def news_geo_extraction():
     use_google_geo = models.Option.objects.get(key="use_google_geo").value
     news = models.Operation.objects.filter(geo=False).order_by("-id")
@@ -213,6 +218,7 @@ def news_geo_extraction():
 
 
 @app.task(name="gpe_to_geo")
+@only_one_concurrency(key="gpe_to_geo", timeout=TASKS_TIMEOUT)
 def proper_gpe(gpe_id, number_of_try):
     gpe = models.Ner.objects.filter(id=gpe_id).first()
     location = gpe.entity
@@ -251,6 +257,7 @@ def proper_gpe(gpe_id, number_of_try):
 
 
 @app.task(name="news_sentiment")
+@only_one_concurrency(key="news_sentiment", timeout=TASKS_TIMEOUT)
 def news_sentiment():
     sentiment_analyzer_algorithm = models.Option.objects.get(
         key="sentiment_analyzer"
@@ -278,6 +285,7 @@ def news_sentiment():
 
 
 @app.task(name="news_doc2vec")
+@only_one_concurrency(key="news_doc2vec", timeout=TASKS_TIMEOUT)
 def news_doc2vec():
     spacy_model = AnalyzerConfig.spacy_model
     doc2vec_analyzer_algorithm = models.Option.objects.get(key="doc2vec_analyzer").value
@@ -303,6 +311,7 @@ def news_doc2vec():
 
 
 @app.task(name="news_related")
+@only_one_concurrency(key="news_related", timeout=TASKS_TIMEOUT)
 def news_related():
     related_extraction_limit = int(
         models.Option.objects.get(key="number_of_related_news").value
@@ -337,6 +346,7 @@ def news_related():
 
 
 @app.task(name="news_category")
+@only_one_concurrency(key="news_category", timeout=TASKS_TIMEOUT)
 def news_category():
     spacy_model = AnalyzerConfig.spacy_model
     news = models.Operation.objects.filter(category=False).order_by("-id")
@@ -363,6 +373,7 @@ def news_category():
 
 
 @app.task(name="news_summary")
+@only_one_concurrency(key="news_summary", timeout=TASKS_TIMEOUT)
 def news_summary():
     from sumy.parsers.plaintext import PlaintextParser
     from sumy.nlp.tokenizers import Tokenizer
