@@ -70,7 +70,7 @@ def news_importer():
     myclient = pymongo.MongoClient(f"mongodb://mongodb:{settings.MONGO_DB_PORT}/")
     news_raw = myclient["news_raw"]["news_raw"]
     last_imported_news_id = Option.objects.get(key="last_imported_news").value
-    print(f"last imported news mongo_id was {last_imported_news_id}")
+    # print(f"last imported news mongo_id was {last_imported_news_id}")
 
     _filter = {"_id": {"$gt": ObjectId(last_imported_news_id)}, "body": {"$ne": ""}}
     projection = {
@@ -86,7 +86,7 @@ def news_importer():
     }
 
     last_docs_count = news_raw.count_documents(_filter)
-    print(f"{last_docs_count} number of documents are queued to insert to postgres")
+    # print(f"{last_docs_count} number of documents are queued to insert to postgres")
 
     # Getting news that must be imported to postgres from mongo
     last_docs = news_raw.find(
