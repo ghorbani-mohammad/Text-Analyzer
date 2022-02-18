@@ -36,7 +36,7 @@ from analyzer.category import categoryx
 from analyzer.summary import summaryx
 
 
-logger = logging.getLogger("django")
+logger = logging.getLogger(__name__)
 
 
 @app.task(name="news_mongo_to_postgres")
