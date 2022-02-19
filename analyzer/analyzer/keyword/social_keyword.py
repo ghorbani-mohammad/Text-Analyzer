@@ -42,6 +42,7 @@ class TextRank4Keyword:
             # tags = my_tagger.parse(tokens)
             for i, token in enumerate(tokens):
                 if token in self.stop_words:
+                    print("is stop word")
                     continue
                 else:
                     # if tags[i][1] in candid_pos:
