@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-import string
 import numpy as np
 from parsivar import *
 from parsivar import Tokenizer
@@ -10,8 +9,8 @@ from collections import OrderedDict
 
 
 normalizer = Normalizer()
-# my_tagger = POSTagger()
 tokenizer = Tokenizer()
+# my_tagger = POSTagger() # Unfortuantely, pos tagger for persian is not working
 
 
 class TextRank4Keyword:
@@ -26,8 +25,6 @@ class TextRank4Keyword:
         self.stop_words = [
             line.rstrip("\n") for line in open("stop_words.txt", encoding="utf8")
         ]
-        print(f"lent stop words is {len(self.stop_words)}")
-        print(f"stop words are {self.stop_words}")
 
     def normalize_text(self, text):
         return self.normalizer.normalize(text)
@@ -40,10 +37,8 @@ class TextRank4Keyword:
         for sentence in sentences:
             pured_sentence = []
             tokens = tokenizer.tokenize_words(sentence)
-            # print(tokens)
             # tags = my_tagger.parse(tokens)
             for i, token in enumerate(tokens):
-                # print(f"token is {token}, is stop_word: {token in self.stop_words}")
                 if token in self.stop_words:
                     continue
                 else:
@@ -178,42 +173,3 @@ def analyze_files(text):
     phrases_score = tr4w.score_phrase(phrases, scores)
     kp = tr4w.get_keyphrases(phrases_score)
     return kw, kp
-
-
-def keyword_keyphrase():
-    alpha = list(string.ascii_lowercase) + list(string.ascii_uppercase)
-    alpha.append("@")
-    alpha.append("#")
-    key_phrase = {}
-    key_words = {}
-    data = pd.read_excel("./input/formaled_data.xlsx")
-    for row in range(data.shape[0]):
-        com = str(data["stemmer"].iloc[row])
-        com = com.replace("_", " ")
-        kw, kp = analyze_files(com)
-        for k in kp:
-            if k in key_phrase:
-                key_phrase[k] += 1
-            else:
-                if list(filter(k.startswith, alpha)) != []:
-                    continue
-                else:
-                    key_phrase[k] = 1
-        for k in kw:
-            if k in key_words:
-                key_words[k] += 1
-            else:
-                if list(filter(k.startswith, alpha)) != []:
-                    continue
-                else:
-                    key_words[k] = 1
-    final_keywords = {
-        key: key_words[key] for key in key_words if key_words[key] > 2 and len(key) >= 2
-    }
-    df = pd.DataFrame(key_phrase.items())
-    df.to_excel("./output/keyphrases.xlsx")
-    df = pd.DataFrame(final_keywords.items())
-    df.to_excel("./output/keywords.xlsx")
-
-
-# keyword_keyphrase()
