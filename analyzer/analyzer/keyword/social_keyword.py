@@ -26,6 +26,7 @@ class TextRank4Keyword:
         self.stop_words = [
             line.rstrip("/n") for line in open("stop_words.txt", encoding="utf8")
         ]
+        print(f"lent stop words is {len(self.stop_words)}")
 
     def normalize_text(self, text):
         return self.normalizer.normalize(text)
