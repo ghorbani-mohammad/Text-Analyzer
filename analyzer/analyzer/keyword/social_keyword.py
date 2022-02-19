@@ -39,6 +39,7 @@ class TextRank4Keyword:
         for sentence in sentences:
             pured_sentence = []
             tokens = tokenizer.tokenize_words(sentence)
+            print(token)
             # tags = my_tagger.parse(tokens)
             for i, token in enumerate(tokens):
                 if token in self.stop_words:
