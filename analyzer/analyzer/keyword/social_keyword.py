@@ -42,7 +42,7 @@ class TextRank4Keyword:
             # print(tokens)
             # tags = my_tagger.parse(tokens)
             for i, token in enumerate(tokens):
-                print(f"token is {token}, is stop_word: {token in self.stop_word}")
+                print(f"token is {token}, is stop_word: {token in self.stop_words}")
                 if token in self.stop_words:
                     continue
                 else:
