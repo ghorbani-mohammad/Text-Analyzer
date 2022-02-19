@@ -42,7 +42,5 @@ class SentimentWordsAPIView(views.APIView):
 
 class KeywordExtractionAPIView(views.APIView):
     def post(self, request, version):
-        print(request.data)
         x, y = analyze_files(request.data["body"])
-        print(x, y)
-        return Response()
+        return Response({"keywords": x, "keyphrases": y})
