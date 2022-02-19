@@ -1,8 +1,8 @@
 version: '3.4'
 
 services:
-  analyzer_django:
-    container_name: analyzer_django
+  analyzer_api:
+    container_name: analyzer_api
     image: analyzer
     build:
       context: .

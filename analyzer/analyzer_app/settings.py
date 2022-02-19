@@ -1,5 +1,6 @@
 import os
 import environ
+from django.http.request import HttpRequest
 
 env = environ.Env()
 
@@ -118,3 +119,8 @@ CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Asia/Tehran"
+
+# monkey patch to get rid of message below in docker
+# for bellow error (it happens because we have _ in container name)
+# 'analyzer_api:80'. The domain name provided is not valid according to RFC 1034/1035.
+HttpRequest.get_host = HttpRequest._get_raw_host
