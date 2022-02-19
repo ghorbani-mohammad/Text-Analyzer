@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import views
 
 from .models import News
+from keyword.social_keyword import analyze_files
 
 
 class SentimentWordsAPIView(views.APIView):
@@ -40,5 +41,8 @@ class SentimentWordsAPIView(views.APIView):
 
 
 class KeywordExtractionAPIView(views.APIView):
-    def get(self, request, version):
+    def post(self, request, version):
+        print(request.data)
+        x, y = analyze_files(request.data["body"])
+        print(x, y)
         return Response()
