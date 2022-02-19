@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import views
 
 from .models import News
-from keyword.social_keyword import analyze_files
+from .keyword.social_keyword import analyze_files
 
 
 class SentimentWordsAPIView(views.APIView):
