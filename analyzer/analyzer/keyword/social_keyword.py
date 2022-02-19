@@ -24,7 +24,7 @@ class TextRank4Keyword:
         self.node_weight = None  # save keywords and its weight
         self.normalizer = Normalizer()
         self.stop_words = [
-            line.rstrip("/n") for line in open("./stop_words.txt", encoding="utf8")
+            line.rstrip("/n") for line in open("stop_words.txt", encoding="utf8")
         ]
 
     def normalize_text(self, text):
