@@ -27,6 +27,7 @@ class TextRank4Keyword:
             line.rstrip("/n") for line in open("stop_words.txt", encoding="utf8")
         ]
         print(f"lent stop words is {len(self.stop_words)}")
+        print(f"stop words are {self.stop_words}")
 
     def normalize_text(self, text):
         return self.normalizer.normalize(text)
@@ -42,7 +43,7 @@ class TextRank4Keyword:
             # print(tokens)
             # tags = my_tagger.parse(tokens)
             for i, token in enumerate(tokens):
-                print(f"token is {token}, is stop_word: {token in self.stop_words}")
+                # print(f"token is {token}, is stop_word: {token in self.stop_words}")
                 if token in self.stop_words:
                     continue
                 else:
