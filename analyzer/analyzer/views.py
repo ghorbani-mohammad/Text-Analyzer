@@ -9,7 +9,7 @@ from rest_framework import views
 from .models import News
 
 
-class SentimentWords(views.APIView):
+class SentimentWordsAPIView(views.APIView):
     def get(self, request, version, news_id):
         document = get_object_or_404(News, id=news_id)
         nltk.download("vader_lexicon")
@@ -37,3 +37,8 @@ class SentimentWords(views.APIView):
         return Response(
             {"positive": set(pos_word_list), "negative": set(neg_word_list)}
         )
+
+
+class KeywordExtractionAPIView(views.APIView):
+    def get(self, request, version):
+        return Response()
