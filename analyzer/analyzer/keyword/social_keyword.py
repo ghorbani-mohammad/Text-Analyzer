@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 import string
 import numpy as np
-import pandas as pd
 from parsivar import *
 from parsivar import Tokenizer
 from parsivar import POSTagger
