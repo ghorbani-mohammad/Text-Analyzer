@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+import demoji
 import numpy as np
 from parsivar import Tokenizer
 from parsivar import Normalizer
@@ -25,6 +26,7 @@ class TextRank4Keyword:
         ]
 
     def normalize_text(self, text):
+        text = demoji.replace(text, "")
         return self.normalizer.normalize(text)
 
     def get_sentences(self, file_text):
@@ -157,7 +159,7 @@ class TextRank4Keyword:
 
 def analyze_files(text):
     tr4w = TextRank4Keyword()
-    text_normalized = text
+    text_normalized = tr4w.normalize_text(text)
     sentences = tr4w.get_sentences(text_normalized)
     sentences_processed = tr4w.prepare_sentences(
         sentences, ["N", "Ne", "N_SING", "ADJ", "Aje", "AJ", "ADV_COMP"]
