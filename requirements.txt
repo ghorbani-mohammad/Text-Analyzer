@@ -8,6 +8,7 @@ djangorestframework==3.11.0
 gensim==3.8.3
 geopy==1.22.0
 gunicorn==20.0.4
+hazm 0.7.0
 ipython==7.9.0
 nltk
 parsivar==0.2.3
