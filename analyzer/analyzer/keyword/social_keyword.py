@@ -1,14 +1,14 @@
 from __future__ import unicode_literals
 import numpy as np
 from parsivar import Tokenizer
-from parsivar import POSTagger
 from parsivar import Normalizer
 from collections import OrderedDict
 
+# from parsivar import POSTagger
 
 normalizer = Normalizer()
 tokenizer = Tokenizer()
-my_tagger = POSTagger()  # Unfortuantely, pos tagger for persian is not working
+# my_tagger = POSTagger()  # Unfortuantely, pos tagger for persian is not working
 
 
 class TextRank4Keyword:
