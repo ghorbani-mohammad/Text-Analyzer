@@ -10,7 +10,7 @@ from collections import OrderedDict
 
 normalizer = Normalizer()
 tokenizer = Tokenizer()
-# my_tagger = POSTagger() # Unfortuantely, pos tagger for persian is not working
+my_tagger = POSTagger()  # Unfortuantely, pos tagger for persian is not working
 
 
 class TextRank4Keyword:
