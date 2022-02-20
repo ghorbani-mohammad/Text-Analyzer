@@ -1,8 +1,6 @@
 from __future__ import unicode_literals
 import numpy as np
-from parsivar import *
 from parsivar import Tokenizer
-
 from parsivar import POSTagger
 from parsivar import Normalizer
 from collections import OrderedDict
