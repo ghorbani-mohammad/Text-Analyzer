@@ -27,8 +27,11 @@ class TextRank4Keyword:
         ]
 
     def normalize_text(self, text):
-        text = demoji.replace(text, " ")
-        text = re.sub("([@#][A-Za-z0-9_]+)|(\w+:\/\/\S+)", " ", text)
+        text = demoji.replace(text, " ")  # remove emojis
+        text = re.sub(
+            "([@#][A-Za-z0-9_]+)|(\w+:\/\/\S+)", " ", text
+        )  # remove urls/hashtags/mentions
+        text = re.sub("^\d+\s|\s\d+\s|\s\d+$", " ", text)  # remove numbers
         return self.normalizer.normalize(text)
 
     def get_sentences(self, file_text):
