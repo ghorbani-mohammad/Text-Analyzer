@@ -31,7 +31,7 @@ class TextRank4Keyword:
         text = re.sub(
             "([@#][A-Za-z0-9\u0600-\u06FF_]+)|(\w+:\/\/\S+)", " ", text
         )  # remove urls/hashtags/mentions
-        text = re.sub("(\d+,)+", " ", text)  # remove numbers with comma
+        text = re.sub("((\d+)*(\.|,)(\d+)*)+", " ", text)
         text = re.sub("^\d+\s|\s\d+\s|\s\d+$", " ", text)  # remove numbers
         text = re.sub("\s*[^ /]+/[^ /]+", " ", text)  # remove urls witout :
         return self.normalizer.normalize(text)
