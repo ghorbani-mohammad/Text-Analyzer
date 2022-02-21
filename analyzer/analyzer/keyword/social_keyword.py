@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+import re
 import demoji
 import numpy as np
 from parsivar import Tokenizer
@@ -27,6 +28,7 @@ class TextRank4Keyword:
 
     def normalize_text(self, text):
         text = demoji.replace(text, "")
+        text = re.sub("([@#][A-Za-z0-9_]+)|(\w+:\/\/\S+)", " ", text)
         return self.normalizer.normalize(text)
 
     def get_sentences(self, file_text):
