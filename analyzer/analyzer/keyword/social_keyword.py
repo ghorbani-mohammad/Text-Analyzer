@@ -27,7 +27,7 @@ class TextRank4Keyword:
         ]
 
     def normalize_text(self, text):
-        text = demoji.replace(text, "")
+        text = demoji.replace(text, " ")
         text = re.sub("([@#][A-Za-z0-9_]+)|(\w+:\/\/\S+)", " ", text)
         return self.normalizer.normalize(text)
 
