@@ -10,7 +10,7 @@ from collections import OrderedDict
 
 normalizer = Normalizer()
 tokenizer = Tokenizer()
-# my_tagger = POSTagger()  # Unfortuantely, pos tagger for persian is not working
+# my_tagger = POSTagger()  # Unfortunately, pos tagger for persian is not working
 
 
 class TextRank4Keyword:
@@ -40,9 +40,9 @@ class TextRank4Keyword:
         return tokenizer.tokenize_sentences(file_text)
 
     def prepare_sentences(self, sentences, candid_pos):
-        pured_sentences = []
+        purged_sentences = []
         for sentence in sentences:
-            pured_sentence = []
+            purged_sentence = []
             tokens = tokenizer.tokenize_words(sentence)
             # tags = my_tagger.parse(tokens)
             for i, token in enumerate(tokens):
@@ -51,9 +51,9 @@ class TextRank4Keyword:
                 else:
                     # if tags[i][1] in candid_pos:
                     token = token.replace("/u200c", " ")
-                    pured_sentence.append(token)
-            pured_sentences.append(pured_sentence)
-        return pured_sentences
+                    purged_sentence.append(token)
+            purged_sentences.append(purged_sentence)
+        return purged_sentences
 
     def get_vocab(self, sentences):
         """Get all tokens"""
@@ -126,7 +126,7 @@ class TextRank4Keyword:
         for sentence in sentences:
             sentence_candid_phrases = []
             tokens = tokenizer.tokenize_words(sentence)
-            # tagss = my_tagger.parse(tokens)
+            # tags = my_tagger.parse(tokens)
             candid_phrase = []
             for i, token in enumerate(tokens):
                 if token not in self.stop_words:
