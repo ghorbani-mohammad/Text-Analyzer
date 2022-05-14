@@ -166,7 +166,7 @@ def news_ner_extraction():
                 news.date,
                 ner_extraction_types,
             )
-            results = x.find_NER_tag(now)
+            results = x.find_NER_tag()
             obj = []
             for entity in results.keys():
                 for value in results.get(entity):
