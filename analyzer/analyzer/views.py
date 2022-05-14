@@ -49,7 +49,8 @@ class NERExtractionAPIView(views.APIView):
     def post(self, request, version):
         text = request.data["text"]
         try:
-            return Response(ner.NameEntityRecognition(remove_htmls_tags_filter(text)))
+            x = ner.NameEntityRecognition(remove_htmls_tags_filter(text))
+            return Response(x.find_all_tags())
         except:
             logger.error(traceback.format_exc())
         return Response({})
