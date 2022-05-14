@@ -115,12 +115,8 @@ def remove_htmls_tags_filter(text):
 @app.task(name="news_keyword_extraction")
 @only_one_concurrency(key="news_keyword_extraction", timeout=TASKS_TIMEOUT)
 def news_keyword_extraction():
-    keyword_extraction_limit = int(
-        models.Option.objects.get(key="number_of_keywords").value
-    )
-    keyword_extraction_algo = models.Option.objects.get(
-        key="keyword_extraction_algorithm"
-    ).value
+    limit = int(models.Option.objects.get(key="number_of_keywords").value)
+    algorithm = models.Option.objects.get(key="keyword_extraction_algorithm").value
 
     news = models.Operation.objects.filter(keyword=False).order_by("-id")
     for item in news[:50]:
@@ -128,9 +124,7 @@ def news_keyword_extraction():
             models.Keyword.objects.filter(news_id=item.news_id.id).delete()
             body = models.News.objects.get(id=item.news_id.id).body
             body = remove_htmls_tags_filter(body)
-            keywords = keywordAnalyzer.analyzeKeyword(
-                item.news_id.id, body, keyword_extraction_limit, keyword_extraction_algo
-            )
+            keywords = keywordAnalyzer.analyzeKeyword(body, limit, algorithm)
             obj = []
             now = time.strftime("%Y-%m-%d %H:%M:%S")
             for keyword in keywords:

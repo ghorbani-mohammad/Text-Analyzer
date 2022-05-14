@@ -11,6 +11,7 @@ from rest_framework import views
 from .models import News
 from analyzer.ner import ner
 from .tasks import remove_htmls_tags_filter
+from analyzer.keyword import keywordAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,18 @@ class NERExtractionAPIView(views.APIView):
         try:
             x = ner.NameEntityRecognition(remove_htmls_tags_filter(text))
             return Response(x.find_all_tags())
+        except:
+            logger.error(traceback.format_exc())
+        return Response({})
+
+
+class KeywordAPIView(views.APIView):
+    def post(self, request, version):
+        text = request.data["text"]
+        try:
+            text = remove_htmls_tags_filter(text)
+            keywords = keywordAnalyzer.analyzeKeyword(text, 20, "rake")
+            return Response({"keywords": keywords})
         except:
             logger.error(traceback.format_exc())
         return Response({})
