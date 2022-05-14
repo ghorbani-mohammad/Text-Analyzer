@@ -2,13 +2,17 @@ from analyzer.apps import AnalyzerConfig
 
 
 class NameEntityRecognition:
-    def __init__(self, news_id, news_body, news_date, types):
-        self.news_body = news_body
-        self.news_id = news_id
-        self.news_date = news_date
+    def __init__(self, text, types=None):
+        self.text = text
         self.nlp = AnalyzerConfig.spacy_model
         self.types = types
         self.results = None
+
+    @staticmethod
+    def make_unique_list_result(result):
+        for key in result.keys():
+            result[key] = list(set(result[key]))
+        return result
 
     def find_NER_tag(self):
         self.results = {
@@ -20,7 +24,7 @@ class NameEntityRecognition:
             "EVENT": [],
             "MONEY": [],
         }
-        doc = self.nlp(self.news_body)
+        doc = self.nlp(self.text)
         for entity in doc.ents:
             if entity.label_ == "PERSON":
                 if "person" in self.types:
@@ -52,8 +56,30 @@ class NameEntityRecognition:
         self.results = NameEntityRecognition.make_unique_list_result(self.results)
         return self.results
 
-    @staticmethod
-    def make_unique_list_result(result):
-        for key in result.keys():
-            result[key] = list(set(result[key]))
-        return result
+    def find_all_tags(self):
+        results = {
+            "person": [],
+            "FAC": [],
+            "ORG": [],
+            "GPE": [],
+            "LOC": [],
+            "EVENT": [],
+            "MONEY": [],
+        }
+        doc = self.nlp(self.text)
+        for entity in doc.ents:
+            if entity.label_ == "PERSON":
+                results["person"].append(entity.text)
+            elif entity.label_ == "FAC":
+                results["FAC"].append(entity.text)
+            elif entity.label_ == "ORG":
+                results["ORG"].append(entity.text)
+            elif entity.label_ == "GPE":
+                results["GPE"].append(entity.text)
+            elif entity.label_ == "LOC":
+                results["LOC"].append(entity.text)
+            elif entity.label_ == "EVENT":
+                results["EVENT"].append(entity.text)
+            elif entity.label_ == "MONEY":
+                results["MONEY"].append(entity.text)
+        return NameEntityRecognition.make_unique_list_result(results)

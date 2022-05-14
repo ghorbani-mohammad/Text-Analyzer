@@ -161,10 +161,7 @@ def news_ner_extraction():
             models.Ner.objects.filter(news_id=item.news_id.id).delete()
             news = models.News.objects.get(id=item.news_id.id)
             x = ner.NameEntityRecognition(
-                item.news_id.id,
-                remove_htmls_tags_filter(news.body),
-                news.date,
-                ner_extraction_types,
+                remove_htmls_tags_filter(news.body), ner_extraction_types
             )
             results = x.find_NER_tag()
             obj = []

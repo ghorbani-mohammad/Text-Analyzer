@@ -1,4 +1,6 @@
 import nltk
+import logging
+import traceback
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.corpus import stopwords
 
@@ -7,6 +9,10 @@ from rest_framework.response import Response
 from rest_framework import views
 
 from .models import News
+from analyzer.ner import ner
+from .tasks import remove_htmls_tags_filter
+
+logger = logging.getLogger(__name__)
 
 
 class SentimentWordsAPIView(views.APIView):
@@ -37,3 +43,14 @@ class SentimentWordsAPIView(views.APIView):
         return Response(
             {"positive": set(pos_word_list), "negative": set(neg_word_list)}
         )
+
+
+class NERExtractionAPIView(views.APIView):
+    def post(self, request):
+        text = request.data["text"]
+        try:
+            x = ner.NameEntityRecognition(remove_htmls_tags_filter(text))
+            return Response(x.find_all_tags())
+        except:
+            logger.error(traceback.format_exc())
+        return Response({})
