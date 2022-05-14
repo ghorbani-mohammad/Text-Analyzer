@@ -20,3 +20,8 @@ class OperationAdmin(admin.ModelAdmin):
     )
     list_per_page = 30
     raw_id_fields = ("news_id",)
+
+
+@admin.register(models.Option)
+class OptionAdmin(admin.ModelAdmin):
+    list_display = ("pk", "name", "created_at", "updated_at")
