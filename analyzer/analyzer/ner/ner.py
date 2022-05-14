@@ -26,37 +26,38 @@ class NameEntityRecognition:
         }
         doc = self.nlp(self.news_body)
         for entity in doc.ents:
-            if (entity.label_ == "PERSON") and (
-                entity.text not in self.results["person"]
-            ):
+            if entity.label_ == "PERSON":
                 if "person" in self.types:
                     self.results["person"].append(entity.text)
             # Buildings, airports, highways, bridges, etc,
-            elif (entity.label_ == "FAC") and (entity.text not in self.results["FAC"]):
+            elif entity.label_ == "FAC":
                 if "fac" in self.types:
                     self.results["FAC"].append(entity.text)
             # Companies, agencies, institutions, etc.
-            elif (entity.label_ == "ORG") and (entity.text not in self.results["ORG"]):
+            elif entity.label_ == "ORG":
                 if "org" in self.types:
                     self.results["ORG"].append(entity.text)
             # Countries, cities, states.
-            elif (entity.label_ == "GPE") and (entity.text not in self.results["GPE"]):
+            elif entity.label_ == "GPE":
                 if "gpe" in self.types:
                     self.results["GPE"].append(entity.text)
             # Non-GPE locations, mountain ranges, bodies of water.
-            elif (entity.label_ == "LOC") and (entity.text not in self.results["LOC"]):
+            elif entity.label_ == "LOC":
                 if "loc" in self.types:
                     self.results["LOC"].append(entity.text)
             # Named hurricanes, battles, wars, sports events, etc.
-            elif (entity.label_ == "EVENT") and (
-                entity.text not in self.results["EVENT"]
-            ):
+            elif entity.label_ == "EVENT":
                 if "event" in self.types:
                     self.results["EVENT"].append(entity.text)
             # Monetary values, including unit.
-            elif (entity.label_ == "MONEY") and (
-                entity.text not in self.results["MONEY"]
-            ):
+            elif entity.label_ == "MONEY":
                 if "money" in self.types:
                     self.results["MONEY"].append(entity.text)
+        self.results = NameEntityRecognition.make_unique_list_result(self.results)
         return self.results
+
+    @staticmethod
+    def make_unique_list_result(result):
+        for key in result.keys():
+            result[key] = list(set(result[key]))
+        return result
