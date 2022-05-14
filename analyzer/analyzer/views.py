@@ -62,7 +62,7 @@ class KeywordAPIView(views.APIView):
         text = request.data["text"]
         try:
             text = remove_htmls_tags_filter(text)
-            keywords = keywordAnalyzer.analyzeKeyword(text, 20, "rake")
+            keywords = keywordAnalyzer.analyzeKeyword(text, 10, "gensimWithWordNet")
             return Response({"keywords": keywords})
         except:
             logger.error(traceback.format_exc())
