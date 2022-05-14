@@ -1,7 +1,3 @@
-import spacy
-import time
-from geopy.geocoders import Nominatim
-from datetime import datetime as dt
 from analyzer.apps import AnalyzerConfig
 
 
