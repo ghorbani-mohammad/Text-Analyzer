@@ -9,6 +9,6 @@ urlpatterns = [
 
 urlpatterns += staticfiles_urlpatterns()
 
-admin.site.site_header = "Analyzer Administration Panel"
 admin.site.index_title = "Analyzer"
 admin.site.site_title = "Analyzer Admin"
+admin.site.site_header = "Analyzer Administration Panel"
