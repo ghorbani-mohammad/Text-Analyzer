@@ -111,11 +111,11 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # Celery
 BROKER_URL = "redis://analyzer_redis:6379/10"
-CELERY_RESULT_BACKEND = "redis://analyzer_redis:6379/10"
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Asia/Tehran"
+CELERY_RESULT_BACKEND = "redis://analyzer_redis:6379/10"
 
 # monkey patch to get rid of message below in docker
 # for bellow error (it happens because we have _ in container name)
