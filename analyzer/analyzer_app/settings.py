@@ -19,8 +19,8 @@ DATABASES = {
         "HOST": "postgres",
         "NAME": "postgres",
         "USER": env.str("DB_USER"),
-        "PASSWORD": env.str("DB_PASS"),
         "PORT": env.str("DB_PORT"),
+        "PASSWORD": env.str("DB_PASS"),
     },
 }
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
