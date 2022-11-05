@@ -15,12 +15,12 @@ ELASTICSEARCH_DSL = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "OPTIONS": {"options": "-c search_path=army"},
         "HOST": "postgres",
         "NAME": "postgres",
         "USER": env.str("DB_USER"),
         "PORT": env.str("DB_PORT"),
         "PASSWORD": env.str("DB_PASS"),
+        "OPTIONS": {"options": "-c search_path=army"},
     },
 }
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
