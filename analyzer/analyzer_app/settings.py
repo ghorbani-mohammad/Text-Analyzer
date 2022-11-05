@@ -111,8 +111,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # Celery
 CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Asia/Tehran"
+CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["application/json"]
 BROKER_URL = "redis://analyzer_redis:6379/10"
 CELERY_RESULT_BACKEND = "redis://analyzer_redis:6379/10"
