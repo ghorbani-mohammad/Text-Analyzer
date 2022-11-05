@@ -5,8 +5,8 @@ from django.http.request import HttpRequest
 env = environ.Env()
 
 ALLOWED_HOSTS = ["*"]
-ELASTIC_DB_PORT = "9200"
 MONGO_DB_PORT = "27017"
+ELASTIC_DB_PORT = "9200"
 DEBUG = env.bool("DEBUG")
 SECRET_KEY = env.str("SECRET_KEY")
 ELASTICSEARCH_DSL = {
