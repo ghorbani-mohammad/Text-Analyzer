@@ -1,6 +1,5 @@
-from sklearn.metrics.pairwise import cosine_similarity
-import dateutil.relativedelta
 import datetime
+from sklearn.metrics.pairwise import cosine_similarity
 
 from analyzer.models import Doc2vec
 
