@@ -20,12 +20,12 @@ msg = {
             "agency_found": "آژانس مورد نظر یافت شد",
             "success_agency_deleted": "آژانس خبری حذف شد",
             "agency_not_found": "آژانس مورد نظر یافت نشد",
+            "agencys_retrieved": "لیست آژانس ها دریافت شد",
             "success_agency_created": "آژانس خبری ایجاد شد",
             "success_agency_updated": "آژانس خبری ویرایش شد",
             "failed_agency_deleted": "حذف آژانس خبری با مشکل مواجه شد",
             "failed_agency_updated": "ویرایش آژانس خبری با مشکل مواجه شد",
             "failed_agency_created": "ایجاد آژانس خبری با مشکل مواجه شد",
-            "agencys_retrieved": "لیست آژانس ها دریافت شد",
             "retrieved_pages": "صفحات آژانس دریافت شد",
         },
         "page": {
