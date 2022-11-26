@@ -8,8 +8,8 @@ msg = {
             "success_crawl_agency_activeAll": "تمامی آژانس های خبری فعال شدند",
             "success_crawl_all": "کرال تمامی صفحات در صف انجام عملیات قرار گرفت",
             "success_crawl_agency_disableAll": "تمامی آژانس های خبری غیر فعال شدند",
-            "success_crawl_agency": "کرال آژانس مورد نظر در صف انجام عملیات قرار گرفت",
             "success_crawl_page": "کرال صفحه ی مورد نظر در صف انجام عملیات قرار گرفت",
+            "success_crawl_agency": "کرال آژانس مورد نظر در صف انجام عملیات قرار گرفت",
         },
         "report": {
             "report_found": "گزارش مورد نظر یافت شد",
