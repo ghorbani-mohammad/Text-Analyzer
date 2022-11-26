@@ -18,6 +18,7 @@ msg = {
         },
         "agency": {
             "agency_found": "آژانس مورد نظر یافت شد",
+            "retrieved_pages": "صفحات آژانس دریافت شد",
             "success_agency_deleted": "آژانس خبری حذف شد",
             "agency_not_found": "آژانس مورد نظر یافت نشد",
             "agencys_retrieved": "لیست آژانس ها دریافت شد",
@@ -26,7 +27,6 @@ msg = {
             "failed_agency_deleted": "حذف آژانس خبری با مشکل مواجه شد",
             "failed_agency_updated": "ویرایش آژانس خبری با مشکل مواجه شد",
             "failed_agency_created": "ایجاد آژانس خبری با مشکل مواجه شد",
-            "retrieved_pages": "صفحات آژانس دریافت شد",
         },
         "page": {
             "success_page_deleted": "صفحه خبری حذف شد",
