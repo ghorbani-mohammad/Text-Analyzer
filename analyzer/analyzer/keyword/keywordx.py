@@ -11,7 +11,6 @@ class Keyword(ABC):
 class KeywordStrategyA(Keyword):
     def analyze(self, body_text, limit):
         from rake_nltk import Rake
-        from nltk.corpus import stopwords
 
         r = Rake(min_length=1, max_length=1)
         r.extract_keywords_from_text(body_text)
