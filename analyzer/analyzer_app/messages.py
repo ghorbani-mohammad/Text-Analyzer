@@ -31,12 +31,12 @@ msg = {
         "page": {
             "page_found": "صفحه مورد نظر یافت شد",
             "success_page_deleted": "صفحه خبری حذف شد",
+            "page_not_found": "صفحه مورد نظر یافت نشد",
             "success_page_created": "صفحه خبری ایجاد شد",
             "success_page_updated": "صفحه خبری ویرایش شد",
             "failed_page_deleted": "حذف صفحه خبری با مشکل مواجه شد",
             "failed_page_updated": "ویرایش صفحه خبری با مشکل مواجه شد",
             "failed_page_created": "ایجاد صفحه خبری با مشکل مواجه شد",
-            "page_not_found": "صفحه مورد نظر یافت نشد",
             "pages_retrieved": "لیست صفحه ها دریافت شد",
         },
     },
