@@ -50,7 +50,7 @@ class Operation(BaseModel):
     summary = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.pk}"
+        return f"{self.pk} - {self.news_id}"
 
 
 class Option(models.Model):
