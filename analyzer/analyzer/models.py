@@ -85,7 +85,7 @@ class Keyword(models.Model):
         db_table = "news_keyword"
 
     def __str__(self):
-        return f"{self.pk}"
+        return f"({self.pk} - {self.news_id} - {self.keyword})"
 
 
 class Ner(models.Model):
