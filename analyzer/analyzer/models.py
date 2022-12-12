@@ -106,7 +106,7 @@ class Ner(models.Model):
         db_table = "news_ner"
 
     def __str__(self):
-        return f"{self.pk}"
+        return f"({self.pk} - {self.news_id} - {self.entity})"
 
 
 class Geo(models.Model):
