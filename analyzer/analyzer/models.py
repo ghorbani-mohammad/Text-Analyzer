@@ -135,7 +135,7 @@ class Geo(models.Model):
         db_table = "ner_country"
 
     def __str__(self):
-        return f"{self.pk}"
+        return f"({self.pk} - {self.news_id} - {self.location})"
 
 
 class Sentiment(models.Model):
