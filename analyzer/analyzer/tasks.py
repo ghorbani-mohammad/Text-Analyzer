@@ -33,6 +33,9 @@ TASKS_TIMEOUT = 10 * MINUTE
 @app.task(name="news_mongo_to_postgres")
 @only_one_concurrency(key="news_mongo_to_postgres", timeout=TASKS_TIMEOUT)
 def news_mongo_to_postgres():
+    """This task fetch latest news from mongodb and store them into postgres
+    It reads last imported news-id from postgres
+    """
     myclient = pymongo.MongoClient(f"mongodb://mongodb:{settings.MONGO_DB_PORT}/")
     news_raw = myclient["news_raw"]["news_raw"]
     last_imported_news_id = models.Option.objects.get(key="last_imported_news").value
