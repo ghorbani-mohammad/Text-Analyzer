@@ -24,4 +24,9 @@ class OperationAdmin(admin.ModelAdmin):
 
 @admin.register(models.Option)
 class OptionAdmin(admin.ModelAdmin):
-    list_display = ("pk", "key", "created_at", "updated_at")
+    list_display = (
+        "pk",
+        "key",
+        "created_at",
+        "updated_at",
+    )
